@@ -11,6 +11,16 @@ pipeline {
         sh './createSymLinkToHL.sh'
       }
     }
+    stage('Install (npm)') {
+      steps {
+        sh 'cd fabcar/javascript && npm install'
+      }
+    }
+    stage('Build (npm)') {
+      steps {
+        sh 'cd fabcar/javascript && npm build'
+      }
+    }
     stage('Actions') {
       steps {
         sh './actionsBeforeServLaunch.sh'
