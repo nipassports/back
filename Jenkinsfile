@@ -28,7 +28,7 @@ pipeline {
     }
     stage('Start') {
       steps {
-        sh 'cd fabcar/javascript && node server.js &'
+        sh 'cd fabcar/javascript && node server.js'
       }
     }
   }
