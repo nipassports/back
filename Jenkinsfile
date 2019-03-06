@@ -3,32 +3,19 @@ pipeline {
   stages {
     stage('Stop') {
       steps {
-        sh 'kill -SIGINT $(ps -au | grep "node server.js" | head -n 1 | cut -d" " -f2) | exit 0'
+        sh 'docker rm -f -v nip-back | exit 0'
+        sh 'docker rmi nip/back | exit 0'
       }
     }
-    stage('Create link to HL') {
+    stage('Build container') {
       steps {
-        sh './createSymLinkToHL.sh'
+        sh 'docker build -t nip/back .'
       }
     }
-    stage('Install (npm)') {
+    stage('Run container') {
       steps {
-        sh 'cd fabcar/javascript && npm install'
-      }
-    }
-    stage('Build (npm)') {
-      steps {
-        sh 'cd fabcar/javascript && npm build'
-      }
-    }
-    stage('Actions') {
-      steps {
-        sh './actionsBeforeServLaunch.sh'
-      }
-    }
-    stage('Start') {
-      steps {
-        sh 'cd fabcar/javascript && node server.js'
+        sh '''docker run -d --name nip-back  -v /var/lib/jenkins/workspace/blockchain_master/first-network/:/app/first-network --net=host nip/back
+'''
       }
     }
   }
