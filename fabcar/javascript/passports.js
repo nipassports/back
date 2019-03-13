@@ -17,7 +17,30 @@ router.get('/', (req, res, next)=>{
         });
     });
 });
-
+router.post('/auth', (req, res, next) => {
+    const num = req.body.numpas;
+    const pwd = req.body.pwdpas;
+    var user = "1234";
+    var mdp = "azerty";
+    var n1 = user.localeCompare(num);
+    var n2 = mdp.localeCompare(pwd);
+    if (n1 == 0 && n2 == 0){
+        res.status(200).send("3");
+    }
+    else {
+        res.status(200).send("5");
+    }
+    /*
+    promise.then( (contract) => {
+        return contract.evaluateTransaction('validNumPwd',id);
+    }).then((buffer)=>{
+        res.status(200).json(JSON.parse(buffer.toString()));
+    }).catch((error)=>{
+        res.status(200).json({
+            error
+        });
+    });*/
+});
 
 router.post('/', (req, res, next)=>{
     const autority = req.body.autority;
@@ -51,6 +74,7 @@ router.post('/', (req, res, next)=>{
         });
     });
 });
+
 router.get('/:passportId' , (req, res, next)=> {
     const id = req.params.passportId;
     promise.then( (contract) =>{
@@ -63,6 +87,7 @@ router.get('/:passportId' , (req, res, next)=> {
         });
     });
 });
+
 router.post('/update/', (req, res, next)=>{
     const passportId = req.body.passportId;
     const newOwner = req.body.newOwner;
