@@ -1,9 +1,12 @@
+// eslint-disable-next-line strict
 const express = require('express');
 const router = express.Router();
 
 const smartContract = require('./smartContract.js');
-
 const promise = smartContract();
+
+var randomstring = require("randomstring");
+var hash = require('object-hash');
 
 router.get('/', (req, res, next)=>{
     promise.then( (contract) =>{
@@ -16,9 +19,9 @@ router.get('/', (req, res, next)=>{
         });
     });
 });
-router.post('/auth', (req, res, next) => {
-    const num = req.body.numpas;
-    const pwd = req.body.pwdpas;
+router.post('/authcitizen', (req, res, next) => {
+    const num = req.body.passNb;
+    const pwd = req.body.password;
     var user = "1234";
     var mdp = "azerty";
     var n1 = user.localeCompare(num);
@@ -31,7 +34,8 @@ router.post('/auth', (req, res, next) => {
     }
     /*
     promise.then( (contract) => {
-        return contract.evaluateTransaction('validNumPwd',id);
+        const salt = "NIPs";
+        return contract.evaluateTransaction('validNumPwd',passNb, hash(pwd.concat(salt)) );
     }).then((buffer)=>{
         res.status(200).json(JSON.parse(buffer.toString()));
     }).catch((error)=>{
@@ -42,28 +46,32 @@ router.post('/auth', (req, res, next) => {
 });
 
 router.post('/', (req, res, next)=>{
-    const Type         = req.body.Type         
-	const CountryCode  = req.body.CountryCode  
-	const PassNb       = req.body.PassNb       
-	const Name         = req.body.Name         
-	const Surname      = req.body.Surname      
-	const DateOfBirth  = req.body.DateOfBirth  
-	const Nationality  = req.body.Nationality  
-	const Sex          = req.body.Sex          
-	const PlaceOfBirth = req.body.PlaceOfBirth 
-	const Height       = req.body.Height       
-	const Autority     = req.body.Autority     
-	const Residence    = req.body.Residence    
-	const EyesColor    = req.body.EyesColor    
-	const DateOfExpiry = req.body.DateOfExpiry 
-	const DateOfIssue  = req.body.DateOfIssue  
-	const PassOrigin   = req.body.PassOrigin   
-	const Validity     = req.body.Validity     
-	const Password     = req.body.Password     
-    console.log('hello');
+    const autority = req.body.autority;
+    const countryCode = req.body.countryCode;
+    const dateOfExpiry = req.body.dateOfExpiry;
+    const dateOfBirth = req.body.dateOfBirth;
+    const dateOfIssue = req.body.dateOfIssue;
+    const eyesColor = req.body.eyesColor;
+    const height = req.body.height;
+    const name = req.body.name;
+    const nationality = req.body.nationality;
+    const passNb = req.body.passNb;
+    const passOrigin = req.body.passOrigin;
+    const placeOfBirth = req.body.placeOfBirth;
+    const residence = req.body.residence;
+    const sex = req.body.sex;
+    const surname = req.body.surname;
+    const type = req.body.type;
+    const validity = req.body.validity;
+    const image = req.body.image;
+
+    var password = randomstring.generate(12);
+    const salt = "NIPs";
+    res.status(200).send(password);
+    console.log('Ajout d\' un passeport');
 
     promise.then( (contract) =>{
-        return contract.submitTransaction('createPassport',Type,CountryCode ,PassNb ,Name ,Surname ,DateOfBirth ,Nationality ,Sex ,PlaceOfBirth,Height ,Autority ,Residence ,EyesColor , DateOfExpiry , DateOfIssue,PassOrigin,Validity,Password);
+        return contract.submitTransaction('createPassport', type , countryCode , passNb , name , surname , dateOfBirth , nationality , sex , placeOfBirth , hash(password.concat(salt)), height , autority , residence , eyesColor , dateOfExpiry , dateOfIssue , passOrigin , validity, image );
     }).then((buffer)=>{
         res.status(200).json({
             message: 'Transaction has been submitted'
