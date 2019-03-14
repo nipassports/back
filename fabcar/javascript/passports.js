@@ -63,7 +63,7 @@ router.post('/', (req, res, next)=>{
     const surname = req.body.surname;
     const type = req.body.type;
     const validity = req.body.validity;
-    const image = req.body.image;
+    const image = "req.body.image";
 
     var password = randomstring.generate(12);
     const salt = "NIPs";
