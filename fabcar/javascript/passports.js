@@ -20,19 +20,9 @@ router.get('/', (req, res, next)=>{
     });
 });
 router.post('/authcitizen', (req, res, next) => {
-    const num = req.body.passNb;
+    const passNb = req.body.passNb;
     const pwd = req.body.password;
-    var user = "1234";
-    var mdp = "azerty";
-    var n1 = user.localeCompare(num);
-    var n2 = mdp.localeCompare(pwd);
-    if (n1 == 0 && n2 == 0){
-        res.status(200).send("3");
-    }
-    else {
-        res.status(200).send("5");
-    }
-    /*
+    
     promise.then( (contract) => {
         const salt = "NIPs";
         return contract.evaluateTransaction('validNumPwd',passNb, hash(pwd.concat(salt)) );
@@ -42,7 +32,7 @@ router.post('/authcitizen', (req, res, next) => {
         res.status(200).json({
             error
         });
-    });*/
+    });
 });
 
 router.post('/', (req, res, next)=>{
@@ -67,10 +57,10 @@ router.post('/', (req, res, next)=>{
 
     var password = randomstring.generate(12);
     const salt = "NIPs";
-    res.status(200).send(password);
     console.log('Ajout d\' un passeport');
 
     promise.then( (contract) =>{
+        res.status(200).send(password);
         return contract.submitTransaction('createPassport', type , countryCode , passNb , name , surname , dateOfBirth , nationality , sex , placeOfBirth , height , autority , residence , eyesColor , dateOfExpiry , dateOfIssue , passOrigin , validity, hash(password.concat(salt)), image );
     }).then((buffer)=>{
         res.status(200).json({
@@ -83,10 +73,10 @@ router.post('/', (req, res, next)=>{
     });
 });
 
-router.get('/:passportId' , (req, res, next)=> {
-    const id = req.params.passportId;
+router.get('/:passNb' , (req, res, next)=> {
+    const passNb = req.params.passNb;
     promise.then( (contract) =>{
-        return contract.evaluateTransaction('queryPassport',id);
+        return contract.evaluateTransaction('queryPassportsByPassNb',passNb);
     }).then((buffer)=>{
         res.status(200).json(JSON.parse(buffer.toString()));
     }).catch((error)=>{
