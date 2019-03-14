@@ -71,7 +71,7 @@ router.post('/', (req, res, next)=>{
     console.log('Ajout d\' un passeport');
 
     promise.then( (contract) =>{
-        return contract.submitTransaction('createPassport', type , countryCode , passNb , name , surname , dateOfBirth , nationality , sex , placeOfBirth , hash(password.concat(salt)), height , autority , residence , eyesColor , dateOfExpiry , dateOfIssue , passOrigin , validity, image );
+        return contract.submitTransaction('createPassport', type , countryCode , passNb , name , surname , dateOfBirth , nationality , sex , placeOfBirth , height , autority , residence , eyesColor , dateOfExpiry , dateOfIssue , passOrigin , validity, hash(password.concat(salt)), image );
     }).then((buffer)=>{
         res.status(200).json({
             message: 'Transaction has been submitted'
