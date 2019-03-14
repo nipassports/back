@@ -35,7 +35,7 @@ async function contract() {
         const network = await gateway.getNetwork('mychannel');
 
         // Get the contract from the network.
-        const contract = await network.getContract('fabcar');
+        const contract = await network.getContract('mycc');
         return contract;
 }
 
