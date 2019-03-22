@@ -12,7 +12,7 @@ const promise = smartContract();
 var randomstring = require("randomstring");
 var hash = require('object-hash');
 
-router.get('/' , checkAuth  , (req, res, next)=>{
+router.get('/' ,  (req, res, next)=>{
     promise.then( (contract) =>{
         return contract.evaluateTransaction('queryAllPassports');
     }).then((buffer)=>{
@@ -113,7 +113,7 @@ router.get('/:passNb' , checkAuth , (req, res, next)=> {
     });
 });
 
-router.post('/update/', checkAuth , (req, res, next)=>{
+router.post('/update/' , (req, res, next)=>{
     const passportId = req.body.passportId;
     const newOwner = req.body.newOwner;
     console.log('hello');
