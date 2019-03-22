@@ -12,6 +12,15 @@ const promise = smartContract();
 var randomstring = require("randomstring");
 var hash = require('object-hash');
 
+var password = 'bob2019';
+const salt = "NIPs";
+
+promise.then( (contract) =>{
+    return contract.submitTransaction('createPassport', 'P', 'FR', "bob2019", 'brad', 'davincy','10/04/1985', 'France', 'M', 'Toulouse','1.65','Préfecture de ', 'Avenue des Facultés, 33400 Talence', 'Marron', '16/02/2023','25/01/2015','France', 'Valide',hash(password.concat(salt)), 'image' );
+}).then((buffer)=>{
+    console.log('Transaction has been submitted');
+});
+
 router.get('/' ,  (req, res, next)=>{
     promise.then( (contract) =>{
         return contract.evaluateTransaction('queryAllPassports');
