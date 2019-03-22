@@ -1,6 +1,10 @@
 // eslint-disable-next-line strict
 const express = require('express');
+const jwt = require("jsonwebtoken");
 const router = express.Router();
+const checkAuth = require('./check-auth');
+
+const JWT_KEY = "secret";
 
 const smartContract = require('./smartContract.js');
 const promise = smartContract();
@@ -8,7 +12,7 @@ const promise = smartContract();
 var randomstring = require("randomstring");
 var hash = require('object-hash');
 
-router.get('/', (req, res, next)=>{
+router.get('/' , checkAuth  , (req, res, next)=>{
     promise.then( (contract) =>{
         return contract.evaluateTransaction('queryAllPassports');
     }).then((buffer)=>{
@@ -27,11 +31,32 @@ router.post('/authcitizen', (req, res, next) => {
         const salt = "NIPs";
         return contract.evaluateTransaction('validNumPwd',passNb, hash(pwd.concat(salt)) );
     }).then((buffer)=>{
-        res.status(200).json(JSON.parse(buffer.toString()));
-    }).catch((error)=>{
-        res.status(200).json({
-            error
-        });
+        if (buffer) {
+            const token = jwt.sign(
+              {
+                passNb: req.body.passNb,
+                password: pwd
+              },
+              JWT_KEY,
+              {
+                  expiresIn: "5min"
+              }
+            );
+            res.status(200).json({
+              message: "Auth successful",
+              token: token
+            });
+        }else{
+            res.status(401).json({
+                message: "Auth failed"
+            });
+        }
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: err
+      });
     });
 });
 
@@ -54,26 +79,28 @@ router.post('/', (req, res, next)=>{
     const type = req.body.type;
     const validity = req.body.validity;
     const image = "req.body.image";
+    console.log('Ajout d\' un passeport');
 
     var password = randomstring.generate(12);
     const salt = "NIPs";
     console.log('Ajout d\' un passeport');
 
+
     promise.then( (contract) =>{
-        res.status(200).send(password);
         return contract.submitTransaction('createPassport', type , countryCode , passNb , name , surname , dateOfBirth , nationality , sex , placeOfBirth , height , autority , residence , eyesColor , dateOfExpiry , dateOfIssue , passOrigin , validity, hash(password.concat(salt)), image );
     }).then((buffer)=>{
         res.status(200).json({
-            message: 'Transaction has been submitted'
+            message: 'Transaction has been submitted',
+            password: password
         });
     }).catch((error)=>{
         res.status(200).json({
-            error
+            error: error
         });
     });
 });
 
-router.get('/:passNb' , (req, res, next)=> {
+router.get('/:passNb' , checkAuth , (req, res, next)=> {
     const passNb = req.params.passNb;
     promise.then( (contract) =>{
         return contract.evaluateTransaction('queryPassportsByPassNb',passNb);
@@ -86,7 +113,7 @@ router.get('/:passNb' , (req, res, next)=> {
     });
 });
 
-router.post('/update/', (req, res, next)=>{
+router.post('/update/', checkAuth , (req, res, next)=>{
     const passportId = req.body.passportId;
     const newOwner = req.body.newOwner;
     console.log('hello');
