@@ -15,10 +15,12 @@
     "author": "Hyperledger",
     "license": "Apache-2.0",
     "dependencies": {
+        "bcrypt": "^3.0.5",
         "express": "^4.16.4",
         "fabric-ca-client": "~1.4.0",
         "fabric-network": "~1.4.0",
         "jsonwebtoken": "^8.5.1",
+        "mongoose": "^5.4.19",
         "morgan": "^1.9.1",
         "object-hash": "^1.3.1",
         "randomstring": "^1.1.5"

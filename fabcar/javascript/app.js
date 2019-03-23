@@ -2,10 +2,15 @@
 const express = require('express');
 const app = express();
 const morgan = require('morgan');
-const bodyParser= require('body-parser');
+const bodyParser = require('body-parser');
+const mongoose  = require('mongoose');
 
+mongoose.connect('mongodb+srv://ozemzami:7ZuoZkVIJcYjpb2l@nips-q4sgv.mongodb.net/test?retryWrites=true', { useNewUrlParser: true })
 
-const passportRoutes = require('./passports');
+const citizenRoute = require('./routes/citizen');
+const gouvernmentRoute = require('./routes/gouvernment');
+const customRoute = require('./routes/custom');
+const adminRoute = require('./routes/admin');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
@@ -18,7 +23,11 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/passports' , passportRoutes);
+app.use('/citizen' , citizenRoute);
+app.use('/gouvernment' , gouvernmentRoute);
+app.use('/custom' , customRoute);
+app.use('/admin' , adminRoute);
+
 
 app.use((req, res, next) => {
     const error = new Error('Not found');
