@@ -11,7 +11,7 @@ const promise = smartContract();
 
 var hash = require('object-hash');
 
-router.post('/authCitizen', (req, res, next) => {
+router.post('/auth', (req, res, next) => {
     const passNb = req.body.passNb;
     const pwd = req.body.password;
     
