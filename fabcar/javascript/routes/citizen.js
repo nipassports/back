@@ -19,7 +19,7 @@ router.post('/auth', (req, res, next) => {
         const salt = "NIPs";
         return contract.evaluateTransaction('validNumPwd',passNb, hash(pwd.concat(salt)) );
     }).then((buffer)=>{
-        if (buffer.toString().equals("true")) {
+        if (buffer.toString() === "true") {
             const token = jwt.sign(
               {
                 passNb: req.body.passNb,
