@@ -61,7 +61,7 @@ router.post("/auth", (req, res, next) => {
 
 
 router.get('/all/:countryCode' ,checkAuth, (req, res, next)=>{
-    const countryCode = req.boby.countryCode;
+    const countryCode = req.params.countryCode;
     promise.then( (contract) =>{
         return contract.evaluateTransaction('searchPassport',countryCode);
     }).then((buffer)=>{
