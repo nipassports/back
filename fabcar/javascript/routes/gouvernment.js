@@ -61,11 +61,7 @@ router.post("/auth",(req, res, next) => {
   });
 
 
-<<<<<<< HEAD
 router.get('/all:countryCode' ,checkAuth, (req, res, next)=>{
-=======
-router.get('/all/:countryCode' ,checkAuth, (req, res, next)=>{
->>>>>>> 33da89eb8b2d6bbcc1a25da5b487f4fcc94295d2
     const countryCode = req.params.countryCode;
     promise.then( (contract) =>{
         return contract.evaluateTransaction('searchPassport',countryCode);
