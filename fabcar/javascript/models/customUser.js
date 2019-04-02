@@ -8,8 +8,14 @@ const customUserSchema = mongoose.Schema({
         required: true, 
         unique: true 
     },
-    password: { type: String, required: true },
-    countryCode: { type: String, required: true }
+    password: { 
+        type: String,
+        required: true 
+    },
+    countryCode: { 
+        type: String,
+        required: true
+    },
 });
 
 module.exports = mongoose.model('customUser' , customUserSchema );

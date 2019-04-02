@@ -8,8 +8,18 @@ const gouvernmentUserSchema = mongoose.Schema({
         required: true, 
         unique: true 
     },
-    password: { type: String, required: true },
-    countryCode: { type: String, required: true }
+    password: { 
+        type: String,
+        required: true 
+    },
+    countryCode: { 
+        type: String,
+        required: true 
+    },
+    admin: {
+        type : Boolean,
+        required : true
+    }
 });
 
 module.exports = mongoose.model('GouvernmentUser' , gouvernmentUserSchema );

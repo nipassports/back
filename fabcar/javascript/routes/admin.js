@@ -93,7 +93,8 @@ router.get("/CustomUser", (req, res, next) => {
               _id: new mongoose.Types.ObjectId(),
               identifiant: req.body.identifiant,
               password: hash,
-              countryCode: req.body.countryCode
+              countryCode: req.body.countryCode,
+              admin: req.body.admin
             });
             gouvernmentUser
               .save()
@@ -127,6 +128,7 @@ router.get("/GouvernmentUser", (req, res, next) => {
                 identifiant: doc.identifiant,
                 password: doc.password,
                 countryCode: doc.countryCode,
+                admin: req.body.admin,
               _id: doc._id
             };
           })
