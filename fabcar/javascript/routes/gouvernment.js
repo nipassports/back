@@ -75,45 +75,29 @@ router.get('/all:countryCode' ,checkAuth, (req, res, next)=>{
     });
 });
 
-router.post('/random',(req, res, next)=>{
-    const autority = String(randomItem(["Préfecture de ","Town hall of"]));
-    const countryCode = String(randomItem(["FR", "DE", "UK", "US", "JP", "BR"]));
-    const dateOfExpiry = String(randomItem(["06/02/2020","13/01/2020","31/08/2022","25/10/2019","01/01/2024"]));
-    const dateOfBirth = String(randomItem(["03/03/1995","13/01/1997","08/12/1956","25/12/2001","12/06/1983"]));
-    const dateOfIssue = String(randomItem(["06/02/2010","13/01/2010","31/08/2012","25/10/2009","01/01/2014"]));
-    const eyesColor = String(randomItem(["blue", "brown", "green", "gray", "black"]));
-    const height = String(randomItem(["1.45","1.57","1.98","1.77","1.62","1.85","1.59"]));
-    const name = String(randomItem(["Carla","John","Mathieu","Julie","Anne","Jean-Baptiste","Alexandre"]));
-    const nationality = String(randomItem(["French","German","British","American","Japanese","Brazilian"]));
-    const passNb = randomstring.generate(8);
-    const passOrigin = String(randomItem(["France","Germany","United Kingdom","United States","Japan","Brazil"]));
-    const placeOfBirth = String(randomItem(["France","Germany","United Kingdom","United States","Japan","Brazil"]));
-    const residence = String(randomItem(["Avenue des Facultés, 33400 Talence","600-8216, Kyōto-fu, Kyōto-shi, Shimogyō-ku, Higashi-Shiokōji 721-1","455 Larkspur Dr. California Springs, CA 92926"]));
-    const sex = String(randomItem(["M","F","NB"]));
-    const surname = String(randomItem(["Smith","Legrand","Brown", "Bach","Williams","Bernard","Adamovitch"]));
-    const type = String(randomItem(["P","D"]));
-    const validity = String(randomItem(["Y","N"]));
-    const image = "req.body.image";
-
-    var password = randomstring.generate(12);
-    const salt = "NIPs";
-    console.log('Ajout d\' un passeport');
-
-
-    promise.then( (contract) =>{
-        return contract.submitTransaction('createPassport', type , countryCode , passNb , name , surname , dateOfBirth , nationality , sex , placeOfBirth , height , autority , residence , eyesColor , dateOfExpiry , dateOfIssue , passOrigin , validity, hash(password.concat(salt)), image );
-    }).then((buffer)=>{
-        res.status(200).json({
-            message: 'Transaction has been submitted',
-            password: password
-        });
-    }).catch((error)=>{
-        res.status(200).json({
-            error: error
-        });
-    });
+router.get('/random',(req, res, next)=>{
+  const passeport = {
+    autority : String(randomItem(["Préfecture de ","Town hall of"])),
+    countryCode : String(randomItem(["FR", "DE", "UK", "US", "JP", "BR"])),
+    dateOfExpiry : String(randomItem(["06/02/2020","13/01/2020","31/08/2022","25/10/2019","01/01/2024"])),
+    dateOfBirth : String(randomItem(["03/03/1995","13/01/1997","08/12/1956","25/12/2001","12/06/1983"])),
+    dateOfIssue : String(randomItem(["06/02/2010","13/01/2010","31/08/2012","25/10/2009","01/01/2014"])),
+    eyesColor : String(randomItem(["blue", "brown", "green", "gray", "black"])),
+    height : String(randomItem(["1.45","1.57","1.98","1.77","1.62","1.85","1.59"])),
+    name : String(randomItem(["Carla","John","Mathieu","Julie","Anne","Jean-Baptiste","Alexandre"])),
+    nationality : String(randomItem(["French","German","British","American","Japanese","Brazilian"])),
+    passNb : randomstring.generate(8),
+    passOrigin : String(randomItem(["France","Germany","United Kingdom","United States","Japan","Brazil"])),
+    placeOfBirth : String(randomItem(["France","Germany","United Kingdom","United States","Japan","Brazil"])),
+    residence : String(randomItem(["Avenue des Facultés, 33400 Talence","600-8216, Kyōto-fu, Kyōto-shi, Shimogyō-ku, Higashi-Shiokōji 721-1","455 Larkspur Dr. California Springs, CA 92926"])),
+    sex : String(randomItem(["M","F","NB"])),
+    surname : String(randomItem(["Smith","Legrand","Brown", "Bach","Williams","Bernard","Adamovitch"])),
+    type : String(randomItem(["P","D"])),
+    validity : String(randomItem(["Y","N"])),
+    image : "req.body.image"
+  };
+  res.status(200).json(passeport);
 });
-
 
 router.post('/', checkAuth, (req, res, next)=>{
 
