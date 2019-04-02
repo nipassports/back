@@ -66,8 +66,9 @@ router.post("/auth", (req, res, next) => {
 });
 
 
-router.get('/all:countryCode', checkAuth, (req, res, next) => {
+router.get('/all/:countryCode', checkAuth, (req, res, next) => {
   const countryCode = req.params.countryCode;
+  console.log(countryCode);
   promise.then((contract) => {
     return contract.evaluateTransaction('searchPassportByCountry', countryCode);
   }).then((buffer) => {
@@ -145,7 +146,7 @@ router.post('/', checkAuth, (req, res, next) => {
 });
 
 
-router.get('/one:passNb', checkAuth, (req, res, next) => {
+router.get('/one/:passNb', checkAuth, (req, res, next) => {
   const passNb = req.params.passNb;
   promise.then((contract) => {
     return contract.evaluateTransaction('queryPassportsByPassNb', passNb);
@@ -159,7 +160,7 @@ router.get('/one:passNb', checkAuth, (req, res, next) => {
   });
 });
 
-router.post('/update/', checkAuthAdmin, (req, res, next) => {
+router.post('/update', checkAuthAdmin, (req, res, next) => {
   const passportId = req.body.passportId;
   const newOwner = req.body.newOwner;
   console.log('hello');
