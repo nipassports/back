@@ -64,7 +64,7 @@ router.post("/auth",(req, res, next) => {
 router.get('/all:countryCode' ,checkAuth, (req, res, next)=>{
     const countryCode = req.params.countryCode;
     promise.then( (contract) =>{
-        return contract.evaluateTransaction('searchPassport',countryCode);
+        return contract.evaluateTransaction('searchPassportByCountry',countryCode);
     }).then((buffer)=>{
       
         res.status(200).json(JSON.parse(buffer.toString()));
@@ -134,7 +134,7 @@ router.post('/', checkAuth, (req, res, next)=>{
   const surname = req.body.surname;
   const type = req.body.type;
   const validity = req.body.validity;
-  const image = "req.body.image";
+  const image = req.body.image;
 
   var password = randomstring.generate(12);
   const salt = "NIPs";
