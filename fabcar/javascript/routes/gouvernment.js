@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const router = express.Router();
 const checkAuth = require('../middleware/check-authGouvernment');
-
+const checkAuthAdmin = require('../middleware/check-authAdminGouvernment');
 const JWT_KEY = "secret-gouvernment";
 
 const smartContract = require('../smartContract.js');
@@ -34,38 +34,24 @@ router.post("/auth", (req, res, next) => {
           });
         }
         if (result) {
-          if (gouvernmentUser[0].admin) {
-            console.log("admin gouv log in");
-            const token = jwt.sign({
-                identifiant: gouvernmentUser[0].identifiant,
-                password: gouvernmentUser[0].password
-              },
-              JWT_KEY, {
-                expiresIn: "5min"
-              }
-            );
-            return res.status(200).json({
-              message: "Auth successful",
-              token: token,
-              admin : gouvernmentUser[0].admin
-            });
-          } else {
-            console.log("normal gouv log in");
-            const token = jwt.sign({
-                identifiant: gouvernmentUser[0].identifiant,
-                password: gouvernmentUser[0].password
-              },
-              JWT_KEY, {
-                expiresIn: "5min"
-              }
-            );
-            return res.status(200).json({
-              message: "Auth successful",
-              token: token,
-              admin : gouvernmentUser[0].admin
-            });
-          }
+
+          const token = jwt.sign({
+              identifiant: gouvernmentUser[0].identifiant,
+              password: gouvernmentUser[0].password,
+              countryCode : gouvernmentUser[0].countryCode,
+              admin: gouvernmentUser[0].admin
+            },
+            JWT_KEY, {
+              expiresIn: "5min"
+            }
+          );
+          return res.status(200).json({
+            message: "Auth successful",
+            token: token,
+            admin: gouvernmentUser[0].admin
+          });
         }
+
         res.status(401).json({
           message: "Auth failed"
         });
@@ -173,7 +159,7 @@ router.get('/one:passNb', checkAuth, (req, res, next) => {
   });
 });
 
-router.post('/update/', checkAuth, (req, res, next) => {
+router.post('/update/', checkAuthAdmin, (req, res, next) => {
   const passportId = req.body.passportId;
   const newOwner = req.body.newOwner;
   console.log('hello');
