@@ -7,7 +7,7 @@ const checkAuthCitizen = require('../middleware/check-auth.js');
 const JWT_KEY = "secret";
 
 const smartContract = require('../smartContract.js');
-const promise = smartContract();
+const promise = smartContract(1);
 
 var hash = require('object-hash');
 
