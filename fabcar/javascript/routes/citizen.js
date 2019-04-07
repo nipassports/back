@@ -7,7 +7,8 @@ const checkAuthCitizen = require('../middleware/check-auth.js');
 const JWT_KEY = "secret";
 
 const smartContract = require('../smartContract.js');
-const promise = smartContract(1);
+const promisePassport = smartContract(1,'mycc');
+const promiseVisa = smartContract(1,'visa');
 
 var hash = require('object-hash');
 
@@ -15,8 +16,9 @@ router.post('/auth', (req, res, next) => {
     const passNb = req.body.passNb;
     const pwd = req.body.password;
     
-    promise.then( (contract) => {
+    promisePassport.then( (contract) => {
         const salt = "NIPs";
+        console.log(hash(pwd.concat(salt)));
         return contract.evaluateTransaction('validNumPwd',passNb, hash(pwd.concat(salt)) );
     }).then((buffer)=>{
         if (buffer.toString() === "true") {
@@ -49,10 +51,23 @@ router.post('/auth', (req, res, next) => {
 });
 
 
-router.get('/:passNb' , checkAuthCitizen , (req, res, next)=> {
-    const passNb = req.params.passNb;
-    promise.then( (contract) =>{
+router.get('/passport', checkAuthCitizen , (req, res, next)=> {
+    const passNb = res.locals.passNb;
+    promisePassport.then( (contract) =>{
         return contract.evaluateTransaction('queryPassportsByPassNb',passNb);
+    }).then((buffer)=>{
+        res.status(200).json(JSON.parse(buffer.toString()));
+    }).catch((error)=>{
+        res.status(200).json({
+            error
+        });
+    });
+});
+
+router.get('/visa', checkAuthCitizen , (req, res, next)=> {
+    const passNb = res.locals.passNb;
+    promiseVisa.then( (contract) =>{
+        return contract.evaluateTransaction('queryVisasByPassNb',passNb);
     }).then((buffer)=>{
         res.status(200).json(JSON.parse(buffer.toString()));
     }).catch((error)=>{

@@ -8,7 +8,8 @@ const checkAuth = require('../middleware/check-authCustom.js');
 const JWT_KEY = "secret-custom";
 
 const smartContract = require('../smartContract.js');
-const promise = smartContract(2);
+const promisePassport = smartContract(2,'mycc');
+const promiseVisa = smartContract(2,'visa');
 
 var hash = require('object-hash');
 
@@ -59,8 +60,8 @@ router.post("/auth", (req, res, next) => {
   });
 
 
-router.get('/' ,checkAuth,  (req, res, next)=>{
-    promise.then( (contract) =>{
+router.get('/passport' ,checkAuth,  (req, res, next)=>{
+  promisePassport.then( (contract) =>{
         return contract.evaluateTransaction('queryAllPassports');
     }).then((buffer)=>{
         res.status(200).json(JSON.parse(buffer.toString()));
@@ -72,9 +73,23 @@ router.get('/' ,checkAuth,  (req, res, next)=>{
 });
 
 
-router.get('/:passNb',checkAuth, (req, res, next)=> {
+router.get('/visa' ,checkAuth,  (req, res, next)=>{
+  promiseVisa.then( (contract) =>{
+        return contract.evaluateTransaction('queryAllVisas');
+    }).then((buffer)=>{
+        res.status(200).json(JSON.parse(buffer.toString()));
+    }).catch((error)=>{
+        res.status(200).json({
+            error
+        });
+    });
+});
+
+
+
+router.get('/passport/:passNb',checkAuth, (req, res, next)=> {
     const passNb = req.params.passNb;
-    promise.then( (contract) =>{
+    promisePassport.then( (contract) =>{
         return contract.evaluateTransaction('queryPassportsByPassNb',passNb);
     }).then((buffer)=>{
         res.status(200).json(JSON.parse(buffer.toString()));
@@ -83,6 +98,20 @@ router.get('/:passNb',checkAuth, (req, res, next)=> {
             error
         });
     });
+});
+
+
+router.get('/visa/:passNb',checkAuth, (req, res, next)=> {
+  const passNb = req.params.passNb;
+  promisePassport.then( (contract) =>{
+      return contract.evaluateTransaction('queryVisasByPassNb',passNb);
+  }).then((buffer)=>{
+      res.status(200).json(JSON.parse(buffer.toString()));
+  }).catch((error)=>{
+      res.status(200).json({
+          error
+      });
+  });
 });
 
 module.exports = router;

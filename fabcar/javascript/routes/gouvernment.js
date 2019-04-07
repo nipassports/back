@@ -4,11 +4,11 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const router = express.Router();
 const checkAuth = require('../middleware/check-authGouvernment');
-const checkAuthAdmin = require('../middleware/check-authAdminGouvernment');
 const JWT_KEY = "secret-gouvernment";
 
 const smartContract = require('../smartContract.js');
-const promise = smartContract(3);
+const promisePassport = smartContract(3,'mycc');
+const promiseVisa = smartContract(3,'visa');
 
 var randomItem = require('random-item');
 var randomstring = require("randomstring");
@@ -65,11 +65,82 @@ router.post("/auth", (req, res, next) => {
     });
 });
 
+router.get('/visa', checkAuth, (req, res, next) => {
 
-router.get('/all/:countryCode', checkAuth, (req, res, next) => {
+
+  promiseVisa.then((contract) => {
+    return contract.evaluateTransaction( 'queryAllVisas' );
+  }).then((buffer) => {
+    res.status(200).json(JSON.parse(buffer.toString()));
+  }).catch((error) => {
+    res.status(200).json({
+      error
+    });
+  });
+});
+
+router.post('/visa', checkAuth, (req, res, next) => {
+  const Type  = req.body.Type;
+	const VisaCode = req.body.VisaCode;
+	const PassNb   = req.body.PassNb;
+	const Name     = req.body.Name;
+	const Surname  = req.body.Surname;
+	const Autority        = req.body.Autority;
+	const DateOfExpiry    = req.body.DateOfExpiry;
+	const DateOfIssue     = req.body.DateOfIssue;
+	const PlaceOfIssue    = req.body.PlaceOfIssue;
+	const Validity        = req.body.Validity;
+	const ValidFor        = req.body.ValidFor;
+	const NumberOfEntries = req.body.NumberOfEntries;
+	const DurationOfStay  = req.body.DurationOfStay;
+  const Remarks = req.body.Remarks;
+
+  promiseVisa.then((contract) => {
+    return contract.evaluateTransaction( 'createVisa', Type , VisaCode , PassNb , Name , Surname , Autority , DateOfExpiry , DateOfIssue , PlaceOfIssue , Validity , ValidFor , NumberOfEntries , DurationOfStay , Remarks );
+  }).then((buffer) => {
+    res.status(200).json(JSON.parse(buffer.toString()));
+  }).catch((error) => {
+    res.status(200).json({
+      error
+    });
+  });
+});
+
+router.get('/visa/all/:countryCode', checkAuth, (req, res, next) => {
   const countryCode = req.params.countryCode;
   console.log(countryCode);
-  promise.then((contract) => {
+  promiseVisa.then((contract) => {
+    return contract.evaluateTransaction('queryVisasByCountry', countryCode);
+  }).then((buffer) => {
+
+    res.status(200).json(JSON.parse(buffer.toString()));
+  }).catch((error) => {
+    res.status(200).json({
+      error
+    });
+  });
+});
+
+
+router.get('/visa/one/:passNb', checkAuth, (req, res, next) => {
+  const passNb = req.params.passNb;
+  promiseVisa.then((contract) => {
+    return contract.evaluateTransaction('queryVisasByPassNb', passNb);
+  }).then((buffer) => {
+
+    res.status(200).json(JSON.parse(buffer.toString()));
+  }).catch((error) => {
+    res.status(200).json({
+      error
+    });
+  });
+});
+
+
+router.get('/passport/all/:countryCode', checkAuth, (req, res, next) => {
+  const countryCode = req.params.countryCode;
+  console.log(countryCode);
+  promisePassport.then((contract) => {
     return contract.evaluateTransaction('searchPassportByCountry', countryCode);
   }).then((buffer) => {
 
@@ -105,7 +176,7 @@ router.get('/random', (req, res, next) => {
   res.status(200).json(passeport);
 });
 
-router.post('/', checkAuth, (req, res, next) => {
+router.post('/passport', checkAuth, (req, res, next) => {
 
   const autority = req.body.autority;
   const countryCode = req.body.countryCode;
@@ -131,7 +202,7 @@ router.post('/', checkAuth, (req, res, next) => {
   console.log('Ajout d\' un passeport');
 
 
-  promise.then((contract) => {
+  promisePassport.then((contract) => {
     return contract.submitTransaction('createPassport', type, countryCode, passNb, name, surname, dateOfBirth, nationality, sex, placeOfBirth, height, autority, residence, eyesColor, dateOfExpiry, dateOfIssue, passOrigin, validity, hash(password.concat(salt)), image);
   }).then((buffer) => {
     res.status(200).json({
@@ -146,9 +217,9 @@ router.post('/', checkAuth, (req, res, next) => {
 });
 
 
-router.get('/one/:passNb', checkAuth, (req, res, next) => {
+router.get('/passport/one/:passNb', checkAuth, (req, res, next) => {
   const passNb = req.params.passNb;
-  promise.then((contract) => {
+  promisePassport.then((contract) => {
     return contract.evaluateTransaction('queryPassportsByPassNb', passNb);
   }).then((buffer) => {
     console.log("ok\n");
@@ -160,22 +231,28 @@ router.get('/one/:passNb', checkAuth, (req, res, next) => {
   });
 });
 
-router.post('/update', checkAuthAdmin, (req, res, next) => {
-  const passportId = req.body.passportId;
-  const newOwner = req.body.newOwner;
-  console.log('hello');
+router.post('/passport/update', checkAuth, (req, res, next) => {
+  if(res.locals.admin){
+    const passportId = req.body.passportId;
+    const newOwner = req.body.newOwner;
+    console.log('hello');
 
-  promise.then((contract) => {
-    return contract.submitTransaction('changePassportOwner', passportId, newOwner);
-  }).then((buffer) => {
-    res.status(200).json({
-      message: 'Transaction has been submitted'
+    promisePassport.then((contract) => {
+      return contract.submitTransaction('changePassportOwner', passportId, newOwner);
+    }).then((buffer) => {
+      res.status(200).json({
+        message: 'Transaction has been submitted'
+      });
+    }).catch((error) => {
+      res.status(200).json({
+        error
+      });
     });
-  }).catch((error) => {
-    res.status(200).json({
-      error
+  }else{
+    res.status(401).json({
+      message:'No right'
     });
-  });
+  }
 });
 
 

@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 
 
-async function contract(orgnum) {
+async function contract(orgnum , chaine) {
 
          const ccpPath = path.resolve(__dirname, '..', '..', 'first-network', 'connection'+orgnum+'.json');
         const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
@@ -35,7 +35,7 @@ async function contract(orgnum) {
         const network = await gateway.getNetwork('mychannel');
 
         // Get the contract from the network.
-        const contract = await network.getContract('mycc');
+        const contract = await network.getContract(chaine);
         return contract;
 }
 
