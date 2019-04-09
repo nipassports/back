@@ -1,7 +1,7 @@
 FROM node:8
 
 COPY . /app
-WORKDIR /app/fabcar/javascript
+WORKDIR /app/nip/javascript
 
 RUN npm install
 RUN npm build
