@@ -103,7 +103,7 @@ router.get('/passport/:passNb',checkAuth, (req, res, next)=> {
 
 router.get('/visa/:passNb',checkAuth, (req, res, next)=> {
   const passNb = req.params.passNb;
-  promisePassport.then( (contract) =>{
+  promiseVisa.then( (contract) =>{
       return contract.evaluateTransaction('queryVisasByPassNb',passNb);
   }).then((buffer)=>{
       res.status(200).json(JSON.parse(buffer.toString()));
