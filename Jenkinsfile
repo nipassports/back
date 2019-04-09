@@ -14,7 +14,7 @@ pipeline {
     }
     stage('Run container') {
       steps {
-        sh '''docker run -d --name nip-back  -v /var/lib/jenkins/workspace/blockchain_master/first-network/:/app/first-network -v /var/lib/jenkins/workspace/blockchain_master/fabcar/javascript/wallet:/app/fabcar/javascript/wallet --net=host nip/back
+        sh '''docker run -d --name nip-back  -v /var/lib/jenkins/workspace/blockchain_master/first-network/:/app/first-network -v /var/lib/jenkins/workspace/blockchain_master/nip/javascript/wallet:/app/nip/javascript/wallet --net=host nip/back
 '''
       }
     }
