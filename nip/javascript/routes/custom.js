@@ -8,7 +8,7 @@ const checkAuth = require('../middleware/check-authCustom.js');
 const JWT_KEY = "secret-custom";
 
 const smartContract = require('../smartContract.js');
-const promisePassport = smartContract(2,'mycc');
+const promisePassport = smartContract(2,'passport');
 const promiseVisa = smartContract(2,'visa');
 
 var hash = require('object-hash');

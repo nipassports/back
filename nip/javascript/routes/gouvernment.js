@@ -7,7 +7,7 @@ const checkAuth = require('../middleware/check-authGouvernment');
 const JWT_KEY = "secret-gouvernment";
 
 const smartContract = require('../smartContract.js');
-const promisePassport = smartContract(3,'mycc');
+const promisePassport = smartContract(3,'passport');
 const promiseVisa = smartContract(3,'visa');
 
 var randomItem = require('random-item');
