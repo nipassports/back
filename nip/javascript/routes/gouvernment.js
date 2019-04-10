@@ -80,24 +80,28 @@ router.get('/visa', checkAuth, (req, res, next) => {
 });
 
 router.post('/visa', checkAuth, (req, res, next) => {
-  const Type  = req.body.Type;
-	const VisaCode = req.body.VisaCode;
-	const PassNb   = req.body.PassNb;
-	const Name     = req.body.Name;
-	const Surname  = req.body.Surname;
-	const Autority        = req.body.Autority;
-	const DateOfExpiry    = req.body.DateOfExpiry;
-	const DateOfIssue     = req.body.DateOfIssue;
-	const PlaceOfIssue    = req.body.PlaceOfIssue;
-	const Validity        = req.body.Validity;
-	const ValidFor        = req.body.ValidFor;
-	const NumberOfEntries = req.body.NumberOfEntries;
-	const DurationOfStay  = req.body.DurationOfStay;
-  const Remarks = req.body.Remarks;
+  const type  = req.body.Type;
+	const visaCode = req.body.VisaCode;
+	const passNb   = req.body.PassNb;
+	const name     = req.body.Name;
+	const surname  = req.body.Surname;
+	const autority        = req.body.Autority;
+	const dateOfExpiry    = req.body.DateOfExpiry;
+	const dateOfIssue     = req.body.DateOfIssue;
+	const placeOfIssue    = req.body.PlaceOfIssue;
+	const validity        = req.body.Validity;
+	const validFor        = req.body.ValidFor;
+	const numberOfEntries = req.body.NumberOfEntries;
+	const durationOfStay  = req.body.DurationOfStay;
+  const remarks = req.body.Remarks;
 
-  promiseVisa.then((contract) => {
-    return contract.evaluateTransaction( 'createVisa', Type , VisaCode , PassNb , Name , Surname , Autority , DateOfExpiry , DateOfIssue , PlaceOfIssue , Validity , ValidFor , NumberOfEntries , DurationOfStay , Remarks );
-  }).then((buffer) => {
+  promiseVisa
+  .then((contract) => {
+    return contract.evaluateTransaction( 'createVisa', type , visaCode , passNb , 
+    name , surname , autority , dateOfExpiry , 
+    dateOfIssue , placeOfIssue , validity , validFor , numberOfEntries , durationOfStay , remarks );
+  })
+  .then((buffer) => {
     res.status(200).json(JSON.parse(buffer.toString()));
   }).catch((error) => {
     res.status(200).json({
