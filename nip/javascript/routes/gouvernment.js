@@ -97,9 +97,9 @@ router.post('/visa', checkAuth, (req, res, next) => {
 
   promiseVisa
   .then((contract) => {
-    return contract.evaluateTransaction( 'createVisa', type , visaCode , passNb , 
-    name , surname , autority , dateOfExpiry , 
-    dateOfIssue , placeOfIssue , validity , validFor , numberOfEntries , durationOfStay , remarks );
+    return contract.evaluateTransaction( 'createVisa', type, visaCode, passNb, 
+    name, surname, autority, dateOfExpiry, 
+    dateOfIssue, placeOfIssue, validity, validFor, numberOfEntries, durationOfStay, remarks);
   })
   .then((buffer) => {
     res.status(200).json(JSON.parse(buffer.toString()));
