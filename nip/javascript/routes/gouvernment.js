@@ -80,20 +80,20 @@ router.get('/visa', checkAuth, (req, res, next) => {
 });
 
 router.post('/visa', checkAuth, (req, res, next) => {
-  const type  = req.body.Type;
-	const visaCode = req.body.VisaCode;
-	const passNb   = req.body.PassNb;
-	const name     = req.body.Name;
-	const surname  = req.body.Surname;
-	const autority        = req.body.Autority;
-	const dateOfExpiry    = req.body.DateOfExpiry;
-	const dateOfIssue     = req.body.DateOfIssue;
-	const placeOfIssue    = req.body.PlaceOfIssue;
-	const validity        = req.body.Validity;
-	const validFor        = req.body.ValidFor;
-	const numberOfEntries = req.body.NumberOfEntries;
-	const durationOfStay  = req.body.DurationOfStay;
-  const remarks = req.body.Remarks;
+  const type  = req.body.type;
+	const visaCode = req.body.visaCode;
+	const passNb   = req.body.passNb;
+	const name     = req.body.name;
+	const surname  = req.body.surname;
+	const autority        = req.body.autority;
+	const dateOfExpiry    = req.body.dateOfExpiry;
+	const dateOfIssue     = req.body.dateOfIssue;
+	const placeOfIssue    = req.body.placeOfIssue;
+	const validity        = req.body.validity;
+	const validFor        = req.body.validFor;
+	const numberOfEntries = req.body.numberOfEntries;
+	const durationOfStay  = req.body.durationOfStay;
+  const remarks = req.body.remarks;
 
   promiseVisa
   .then((contract) => {
@@ -207,7 +207,10 @@ router.post('/passport', checkAuth, (req, res, next) => {
 
 
   promisePassport.then((contract) => {
-    return contract.submitTransaction('createPassport', type, countryCode, passNb, name, surname, dateOfBirth, nationality, sex, placeOfBirth, height, autority, residence, eyesColor, dateOfExpiry, dateOfIssue, passOrigin, validity, hash(password.concat(salt)), image);
+    return contract.submitTransaction('createPassport', type, countryCode, 
+    passNb, name, surname, dateOfBirth, nationality, sex, 
+    placeOfBirth, height, autority, residence, eyesColor, 
+    dateOfExpiry, dateOfIssue, passOrigin, validity, hash(password.concat(salt)), image);
   }).then((buffer) => {
     res.status(200).json({
       message: 'Transaction has been submitted',
