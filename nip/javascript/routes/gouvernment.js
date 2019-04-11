@@ -241,14 +241,32 @@ router.get('/passport/one/:passNb', checkAuth, (req, res, next) => {
   });
 });
 
-router.post('/passport/update', checkAuth, (req, res, next) => {
+router.put('/passport/update', checkAuth, (req, res, next) => {
   if(res.locals.admin){
-    const passportId = req.body.passportId;
-    const newOwner = req.body.newOwner;
-    console.log('hello');
+    const autority = req.body.autority;
+    const countryCode = req.body.countryCode;
+    const dateOfExpiry = req.body.dateOfExpiry;
+    const dateOfBirth = req.body.dateOfBirth;
+    const dateOfIssue = req.body.dateOfIssue;
+    const eyesColor = req.body.eyesColor;
+    const height = req.body.height;
+    const name = req.body.name;
+    const nationality = req.body.nationality;
+    const passNb = req.body.passNb;
+    const passOrigin = req.body.passOrigin;
+    const placeOfBirth = req.body.placeOfBirth;
+    const residence = req.body.residence;
+    const sex = req.body.sex;
+    const surname = req.body.surname;
+    const type = req.body.type;
+    const validity = req.body.validity;
+    const image = req.body.image;
 
     promisePassport.then((contract) => {
-      return contract.submitTransaction('changePassportOwner', passportId, newOwner);
+    return contract.submitTransaction('changePassport', type, countryCode, 
+      passNb, name, surname, dateOfBirth, nationality, sex, 
+      placeOfBirth, height, autority, residence, eyesColor, 
+      dateOfExpiry, dateOfIssue, passOrigin, validity, image);
     }).then((buffer) => {
       res.status(200).json({
         message: 'Transaction has been submitted'
