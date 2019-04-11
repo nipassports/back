@@ -104,6 +104,7 @@ router.post('/visa', checkAuth, (req, res, next) => {
   .then((buffer) => {
     res.status(200).json({
       message: 'Transaction has been submitted',
+      moreDetails: buffer 
     });
   }).catch((error) => {
     res.status(200).json({
