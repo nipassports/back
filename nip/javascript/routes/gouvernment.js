@@ -164,7 +164,7 @@ router.get('/valid/:passNb', checkAuth, (req, res, next) => {
   const passNb = req.params.passNb;
   console.log(passNb);
   promisePassport.then((contract) => {
-    return contract.evaluateTransaction('changePassportValidity', passNb);
+    return contract.submitTransaction('changePassportValidity', passNb);
   }).then((buffer) => {
     res.status(200).json({message : "Validity changed"});
   }).catch((error) => {
