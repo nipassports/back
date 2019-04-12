@@ -48,6 +48,7 @@ router.post("/auth", (req, res, next) => {
           return res.status(200).json({
             message: "Auth successful",
             token: token,
+	    countryCode: gouvernmentUser[0].countryCode
             admin: gouvernmentUser[0].admin
           });
         }

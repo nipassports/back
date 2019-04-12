@@ -3,6 +3,8 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+var swaggerUi = require('swagger-ui-express');
+var swaggerDocument = require('./swagger.json');
 const mongoose  = require('mongoose');
 
 mongoose.connect('mongodb+srv://ozemzami:7ZuoZkVIJcYjpb2l@nips-q4sgv.mongodb.net/test?retryWrites=true', { useNewUrlParser: true })
@@ -27,7 +29,7 @@ app.use('/citizen' , citizenRoute);
 app.use('/gouvernment' , gouvernmentRoute);
 app.use('/custom' , customRoute);
 app.use('/admin' , adminRoute);
-
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use((req, res, next) => {
     const error = new Error('Not found');
@@ -43,5 +45,6 @@ app.use((error, req, res, next) =>{
         }
     });
 });
+
 
 module.exports = app;
