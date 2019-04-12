@@ -1,0 +1,664 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "NIPs API"
+  },
+  "schemes": [
+    "http"
+  ],
+  "host": "192.168.0.100:4200",
+  "paths": {
+    "/citizen/auth": {
+      "post": {
+        "tags": [
+          "Citoyens"
+        ],
+        "summary": "Authentification des citoyens",
+        "parameters": [
+          {
+            "name": "identifiants",
+            "in": "body",
+            "description": "Les identifiants",
+            "schema": {
+              "required": [
+                "passNb",
+                "password"
+              ],
+              "properties": {
+                "passNb": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authentification réussie"
+          },
+          "401": {
+            "$ref": "#/responses/Authfailed"
+          }
+        }
+      }
+    },
+    "/citizen/passport": {
+      "get": {
+        "tags": [
+          "Citoyens"
+        ],
+        "summary": "Consulation de son passeport",
+        "parameters": [
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Le passeport du citoyen",
+            "schema": {
+              "$ref": "#/definitions/passport"
+            }
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/citizen/visa": {
+      "get": {
+        "tags": [
+          "Citoyens"
+        ],
+        "summary": "Consulation de ses visas",
+        "parameters": [
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/government/auth": {
+      "post": {
+        "tags": [
+          "Gouvernements"
+        ],
+        "summary": "Authentification des gouvernements",
+        "parameters": [
+          {
+            "name": "identifiants",
+            "in": "body",
+            "description": "Les identifiants",
+            "schema": {
+              "required": [
+                "identifiant",
+                "password"
+              ],
+              "properties": {
+                "identifiant": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/responses/Authfailed"
+          }
+        }
+      }
+    },
+    "/government/all/:{countryCode}": {
+      "get": {
+        "tags": [
+          "Gouvernements"
+        ],
+        "summary": "Liste des passeports d'un gouvernement",
+        "parameters": [
+          {
+            "name": "countryCode",
+            "in": "path",
+            "required": true,
+            "description": "l'identifiant du pays",
+            "type": "string"
+          },
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/government/:{passNB}": {
+      "get": {
+        "tags": [
+          "Gouvernements"
+        ],
+        "summary": "Récupération d'un passeport",
+        "parameters": [
+          {
+            "name": "passNB",
+            "in": "path",
+            "required": true,
+            "description": "le numéro du passeport voulu",
+            "type": "string"
+          },
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Le passeport voulu",
+            "schema": {
+              "$ref": "#/definitions/passport"
+            }
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/government/passport": {
+      "post": {
+        "tags": [
+          "Gouvernements"
+        ],
+        "summary": "Création d'un passeport",
+        "parameters": [
+          {
+            "name": "pass",
+            "in": "body",
+            "description": "The person to create.",
+            "schema": {
+              "$ref": "#/definitions/passport"
+            }
+          },
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/government/visa": {
+      "post": {
+        "tags": [
+          "Gouvernements"
+        ],
+        "summary": "Création d'un visa",
+        "parameters": [
+          {
+            "name": "person",
+            "in": "body",
+            "description": "The person to create.",
+            "schema": {
+              "required": [
+                "username"
+              ],
+              "properties": {
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Gouvernements"
+        ],
+        "summary": "Récupération de la liste des visas",
+        "parameters": [
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/government/visa/all/:{countryCode}": {
+      "get": {
+        "tags": [
+          "Gouvernements"
+        ],
+        "summary": "Récupération de la liste des visas d'un pays",
+        "parameters": [
+          {
+            "name": "countryCode",
+            "in": "path",
+            "required": true,
+            "description": "l'identifiant du pays",
+            "type": "string"
+          },
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/government/visa/one/:{passNb}": {
+      "get": {
+        "tags": [
+          "Gouvernements"
+        ],
+        "summary": "Récupération d'un visas",
+        "parameters": [
+          {
+            "name": "passNb",
+            "in": "path",
+            "required": true,
+            "description": "le numéro du passeport voulu",
+            "type": "string"
+          },
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/custom/auth": {
+      "post": {
+        "tags": [
+          "Douanes"
+        ],
+        "summary": "Authentification des douanes",
+        "parameters": [
+          {
+            "name": "identifiants",
+            "in": "body",
+            "description": "Les identifiants du douanier",
+            "schema": {
+              "required": [
+                "identifiant",
+                "password"
+              ],
+              "properties": {
+                "identifiant": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/responses/Authfailed"
+          }
+        }
+      }
+    },
+    "/custom/passport": {
+      "get": {
+        "tags": [
+          "Douanes"
+        ],
+        "summary": "Liste des passeports",
+        "parameters": [
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "la liste des passeports",
+            "schema": {
+              "$ref": "#/definitions/passports"
+            }
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/custom/passport/:{passNb}": {
+      "get": {
+        "tags": [
+          "Douanes"
+        ],
+        "description": "Récupération d'un passeport",
+        "parameters": [
+          {
+            "name": "passNb",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Le passeport du citoyens",
+            "schema": {
+              "$ref": "#/definitions/passport"
+            }
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/custom/visa/": {
+      "get": {
+        "tags": [
+          "Gouvernements"
+        ],
+        "summary": "Récupération de la liste des visas",
+        "parameters": [
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/custom/visa/:{passNb}": {
+      "get": {
+        "tags": [
+          "Gouvernements"
+        ],
+        "summary": "Récupération des visas d'un passeport",
+        "parameters": [
+          {
+            "name": "passNb",
+            "in": "path",
+            "required": true,
+            "description": "le numéro du passeport voulu",
+            "type": "string"
+          },
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "passport": {
+      "required": [
+        "autority",
+        "countryCode",
+        "dateOfBirth",
+        "dateOfExpiry",
+        "dateOfIssue",
+        "eyesColor",
+        "height",
+        "image",
+        "name",
+        "nationality",
+        "passNb",
+        "passOrigin",
+        "placeOfBirth",
+        "residence",
+        "sex",
+        "surname",
+        "type",
+        "validity"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "John"
+        },
+        "surname": {
+          "type": "string",
+          "example": "Smith"
+        },
+        "passNb": {
+          "type": "string",
+          "example": "F2Z1289"
+        },
+        "countryCode": {
+          "type": "string",
+          "example": "FR"
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "example": "12/02/1948"
+        },
+        "dateOfIssue": {
+          "type": "string",
+          "example": "23/07/2015"
+        },
+        "dateOfExpiry": {
+          "type": "string",
+          "example": "22/07/2035"
+        },
+        "eyesColor": {
+          "type": "string",
+          "example": "green"
+        },
+        "height": {
+          "type": "string",
+          "example": "1.75"
+        },
+        "image": {
+          "type": "string",
+          "example": "image converted"
+        },
+        "nationality": {
+          "type": "string",
+          "example": "belgium"
+        },
+        "passOrigin": {
+          "type": "string",
+          "example": "United States"
+        },
+        "placeOfBirth": {
+          "type": "string",
+          "example": "New York"
+        },
+        "residence": {
+          "type": "string",
+          "example": "Bruxelles"
+        },
+        "sex": {
+          "type": "string",
+          "example": "M"
+        },
+        "type": {
+          "type": "string",
+          "example": "P"
+        },
+        "validity": {
+          "type": "string",
+          "example": "valid"
+        }
+      }
+    },
+    "passports": {
+      "required": [
+        "id",
+        "infos"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "infos": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/passport"
+          }
+        }
+      }
+    }
+  },
+  "responses": {
+    "Standard401ErrorResponse": {
+      "description": "Le token n'est pas valide",
+      "schema": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "auth failed"
+          }
+        }
+      }
+    },
+    "Authfailed": {
+      "description": "L'identifiant ou le mot de passe est incorrect",
+      "schema": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "auth failed"
+          }
+        }
+      }
+    }
+  }
+}
