@@ -160,6 +160,20 @@ router.get('/passport/all/:countryCode', checkAuth, (req, res, next) => {
   });
 });
 
+router.get('/valid/:passNb', checkAuth, (req, res, next) => {
+  const passNb = req.params.passNb;
+  console.log(passNb);
+  promise.then((contract) => {
+    return contract.evaluateTransaction('changePassportValidity', passNb);
+  }).then((buffer) => {
+    res.status(200).json({message : "Validity changed"});
+  }).catch((error) => {
+    res.status(200).json({
+      error
+    });
+  });
+});
+
 router.get('/random', (req, res, next) => {
   const passeport = {
     autority: String(randomItem(["Préfecture de ", "Town hall of"])),
