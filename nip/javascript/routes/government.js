@@ -68,94 +68,12 @@ router.post("/auth", (req, res, next) => {
     });
 });
 
-  ////////////// Visa //////////////
-
-//Récupérer tous les visas
-router.get('/visa', checkAuth, (req, res, next) => {
-
-
-  promiseVisa.then((contract) => {
-    return contract.evaluateTransaction( 'queryAllVisas' );
-  }).then((buffer) => {
-    res.status(200).json(JSON.parse(buffer.toString()));
-  }).catch((error) => {
-    res.status(200).json({
-      error
-    });
-  });
-});
-
-//Créer un visa
-router.post('/visa', checkAuth, (req, res, next) => {
-  const type  = req.body.type;
-	const visaCode = req.body.visaCode;
-	const passNb   = req.body.passNb;
-	const name     = req.body.name;
-	const surname  = req.body.surname;
-	const autority        = req.body.autority;
-	const dateOfExpiry    = req.body.dateOfExpiry;
-	const dateOfIssue     = req.body.dateOfIssue;
-	const placeOfIssue    = req.body.placeOfIssue;
-	const validity        = req.body.validity;
-	const validFor        = req.body.validFor;
-	const numberOfEntries = req.body.numberOfEntries;
-	const durationOfStay  = req.body.durationOfStay;
-  const remarks = req.body.remarks;
-
-  promiseVisa
-  .then((contract) => {
-    return contract.submitTransaction('createVisa', type, visaCode, passNb, 
-    name, surname, autority, dateOfExpiry, 
-    dateOfIssue, placeOfIssue, validity, validFor, numberOfEntries, durationOfStay, remarks);
-  })
-  .then((buffer) => {
-    res.status(200).json({
-      message: 'Transaction has been submitted',
-      moreDetails: buffer 
-    });
-  }).catch((error) => {
-    res.status(200).json({
-      error
-    });
-  });
-});
-
-//Récupérer les visas d'un pays
-router.get('/visa/all/:countryCode', checkAuth, (req, res, next) => {
-  const countryCode = req.params.countryCode;
-  console.log(countryCode);
-  promiseVisa.then((contract) => {
-    return contract.evaluateTransaction('queryVisasByCountry', countryCode);
-  }).then((buffer) => {
-
-    res.status(200).json(JSON.parse(buffer.toString()));
-  }).catch((error) => {
-    res.status(200).json({
-      error
-    });
-  });
-});
-
-//Récupérer les visas d'un citoyen
-router.get('/visa/one/:passNb', checkAuth, (req, res, next) => {
-  const passNb = req.params.passNb;
-  promiseVisa.then((contract) => {
-    return contract.evaluateTransaction('queryVisasByPassNb', passNb);
-  }).then((buffer) => {
-
-    res.status(200).json(JSON.parse(buffer.toString()));
-  }).catch((error) => {
-    res.status(200).json({
-      error
-    });
-  });
-});
 
 ////////////// Passeports //////////////
 
 //Récupérer les passeports d'un pays
-router.get('/passport/all/:countryCode', checkAuth, (req, res, next) => {
-  const countryCode = req.locals.countryCode;
+router.get('/passport/all', checkAuth, (req, res, next) => {
+  const countryCode = res.locals.countryCode;
   console.log(countryCode);
   promisePassport.then((contract) => {
     return contract.evaluateTransaction('searchPassportByCountry', countryCode);
@@ -170,7 +88,7 @@ router.get('/passport/all/:countryCode', checkAuth, (req, res, next) => {
 });
 
 //Changer la validité d'un passeport
-router.get('/valid/:passNb', checkAuth, (req, res, next) => {
+router.get('/passport/valid/:passNb', checkAuth, (req, res, next) => {
   const passNb = req.params.passNb;
   console.log(passNb);
   promisePassport.then((contract) => {
@@ -185,10 +103,9 @@ router.get('/valid/:passNb', checkAuth, (req, res, next) => {
 });
 
 //Génère des informations aléatoires pour un passeport
-router.get('/random', (req, res, next) => {
+router.get('/passport/random', (req, res, next) => {
   const passeport = {
     autority: String(randomItem(["Préfecture de ", "Town hall of"])),
-    countryCode: String(randomItem(["FR", "DE", "UK", "US", "JP", "BR"])),
     dateOfExpiry: String(randomItem(["06/02/2020", "13/01/2020", "31/08/2022", "25/10/2019", "01/01/2024"])),
     dateOfBirth: String(randomItem(["03/03/1995", "13/01/1997", "08/12/1956", "25/12/2001", "12/06/1983"])),
     dateOfIssue: String(randomItem(["06/02/2010", "13/01/2010", "31/08/2012", "25/10/2009", "01/01/2014"])),
@@ -312,7 +229,6 @@ router.put('/passport/update', checkAuth, (req, res, next) => {
 });
 
 //Recherche de passeports
-
 router.post('/passport/search', checkAuth, (req, res, next) => {
   var info = {
     autority: req.body.autority,
@@ -357,4 +273,89 @@ router.post('/passport/search', checkAuth, (req, res, next) => {
   });
 
 });
+
+
+////////////// Visa //////////////
+
+//Récupérer tous les visas
+router.get('/visa', checkAuth, (req, res, next) => {
+
+
+  promiseVisa.then((contract) => {
+    return contract.evaluateTransaction( 'queryAllVisas' );
+  }).then((buffer) => {
+    res.status(200).json(JSON.parse(buffer.toString()));
+  }).catch((error) => {
+    res.status(200).json({
+      error
+    });
+  });
+});
+
+//Créer un visa
+router.post('/visa', checkAuth, (req, res, next) => {
+  const type  = req.body.type;
+	const visaCode = req.body.visaCode;
+	const passNb   = req.body.passNb;
+	const name     = req.body.name;
+	const surname  = req.body.surname;
+	const autority        = req.body.autority;
+	const dateOfExpiry    = req.body.dateOfExpiry;
+	const dateOfIssue     = req.body.dateOfIssue;
+	const placeOfIssue    = req.body.placeOfIssue;
+	const validity        = req.body.validity;
+	const validFor        = req.body.validFor;
+	const numberOfEntries = req.body.numberOfEntries;
+	const durationOfStay  = req.body.durationOfStay;
+  const remarks = req.body.remarks;
+
+  promiseVisa
+  .then((contract) => {
+    return contract.submitTransaction('createVisa', type, visaCode, passNb, 
+    name, surname, autority, dateOfExpiry, 
+    dateOfIssue, placeOfIssue, validity, validFor, numberOfEntries, durationOfStay, remarks);
+  })
+  .then((buffer) => {
+    res.status(200).json({
+      message: 'Transaction has been submitted',
+      moreDetails: buffer 
+    });
+  }).catch((error) => {
+    res.status(200).json({
+      error
+    });
+  });
+});
+
+//Récupérer les visas d'un pays
+router.get('/visa/all/:countryCode', checkAuth, (req, res, next) => {
+  const countryCode = req.params.countryCode;
+  console.log(countryCode);
+  promiseVisa.then((contract) => {
+    return contract.evaluateTransaction('queryVisasByCountry', countryCode);
+  }).then((buffer) => {
+
+    res.status(200).json(JSON.parse(buffer.toString()));
+  }).catch((error) => {
+    res.status(200).json({
+      error
+    });
+  });
+});
+
+//Récupérer les visas d'un citoyen
+router.get('/visa/one/:passNb', checkAuth, (req, res, next) => {
+  const passNb = req.params.passNb;
+  promiseVisa.then((contract) => {
+    return contract.evaluateTransaction('queryVisasByPassNb', passNb);
+  }).then((buffer) => {
+
+    res.status(200).json(JSON.parse(buffer.toString()));
+  }).catch((error) => {
+    res.status(200).json({
+      error
+    });
+  });
+});
+
 module.exports = router;
