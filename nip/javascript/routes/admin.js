@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
 const CustomUser = require('../models/customUser');
-const GovernmentUser = require('../models/governmentUser');
+const GouvernmentUser = require('../models/governmentUser');
 
 router.post("/addCustomUser", (req, res, next) => {
     CustomUser.find({ identifiant: req.body.identifiant })

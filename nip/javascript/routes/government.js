@@ -3,19 +3,21 @@ const express = require('express');
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const router = express.Router();
-const checkAuth = require('../middleware/check-authGovernment');
-const JWT_KEY = "secret-government";
 
+//Include pour les connexions (blockchain et mangoDB)
 const smartContract = require('../smartContract.js');
 const promisePassport = smartContract(3,'passport');
 const promiseVisa = smartContract(3,'visa');
+const GovernmentUser = require('../models/governmentUser');
+const checkAuth = require('../middleware/check-authGovernment');
+const JWT_KEY = "secret-government";
 
+//Include pour le password
 var randomItem = require('random-item');
 var randomstring = require("randomstring");
 var hash = require('object-hash');
-const GovernmentUser = require('../models/governmentUser');
 
-
+//Authentifiction
 router.post("/auth", (req, res, next) => {
   GovernmentUser.find({
       identifiant: req.body.identifiant
@@ -66,6 +68,9 @@ router.post("/auth", (req, res, next) => {
     });
 });
 
+  ////////////// Visa //////////////
+
+//Récupérer tous les visas
 router.get('/visa', checkAuth, (req, res, next) => {
 
 
@@ -80,6 +85,7 @@ router.get('/visa', checkAuth, (req, res, next) => {
   });
 });
 
+//Créer un visa
 router.post('/visa', checkAuth, (req, res, next) => {
   const type  = req.body.type;
 	const visaCode = req.body.visaCode;
@@ -114,6 +120,7 @@ router.post('/visa', checkAuth, (req, res, next) => {
   });
 });
 
+//Récupérer les visas d'un pays
 router.get('/visa/all/:countryCode', checkAuth, (req, res, next) => {
   const countryCode = req.params.countryCode;
   console.log(countryCode);
@@ -129,7 +136,7 @@ router.get('/visa/all/:countryCode', checkAuth, (req, res, next) => {
   });
 });
 
-
+//Récupérer les visas d'un citoyen
 router.get('/visa/one/:passNb', checkAuth, (req, res, next) => {
   const passNb = req.params.passNb;
   promiseVisa.then((contract) => {
@@ -144,9 +151,11 @@ router.get('/visa/one/:passNb', checkAuth, (req, res, next) => {
   });
 });
 
+////////////// Passeports //////////////
 
+//Récupérer les passeports d'un pays
 router.get('/passport/all/:countryCode', checkAuth, (req, res, next) => {
-  const countryCode = req.params.countryCode;
+  const countryCode = req.locals.countryCode;
   console.log(countryCode);
   promisePassport.then((contract) => {
     return contract.evaluateTransaction('searchPassportByCountry', countryCode);
@@ -160,6 +169,7 @@ router.get('/passport/all/:countryCode', checkAuth, (req, res, next) => {
   });
 });
 
+//Changer la validité d'un passeport
 router.get('/valid/:passNb', checkAuth, (req, res, next) => {
   const passNb = req.params.passNb;
   console.log(passNb);
@@ -174,6 +184,7 @@ router.get('/valid/:passNb', checkAuth, (req, res, next) => {
   });
 });
 
+//Génère des informations aléatoires pour un passeport
 router.get('/random', (req, res, next) => {
   const passeport = {
     autority: String(randomItem(["Préfecture de ", "Town hall of"])),
@@ -198,10 +209,11 @@ router.get('/random', (req, res, next) => {
   res.status(200).json(passeport);
 });
 
+//Créer un passeport
 router.post('/passport', checkAuth, (req, res, next) => {
 
   const autority = req.body.autority;
-  const countryCode = req.body.countryCode;
+  const countryCode = req.locals.countryCode;
   const dateOfExpiry = req.body.dateOfExpiry;
   const dateOfBirth = req.body.dateOfBirth;
   const dateOfIssue = req.body.dateOfIssue;
@@ -218,8 +230,8 @@ router.post('/passport', checkAuth, (req, res, next) => {
   const type = req.body.type;
   const validity = req.body.validity;
   const image = req.body.image;
-
-  var password = randomstring.generate(12);
+  var password = "azerty";
+  //var password = randomstring.generate(12);
   const salt = "NIPs";
   console.log('Ajout d\' un passeport');
 
@@ -241,7 +253,7 @@ router.post('/passport', checkAuth, (req, res, next) => {
   });
 });
 
-
+//Récupérer le passeport d'un citoyen
 router.get('/passport/one/:passNb', checkAuth, (req, res, next) => {
   const passNb = req.params.passNb;
   promisePassport.then((contract) => {
@@ -256,10 +268,11 @@ router.get('/passport/one/:passNb', checkAuth, (req, res, next) => {
   });
 });
 
+//Modifier un citoyen
 router.put('/passport/update', checkAuth, (req, res, next) => {
   if(res.locals.admin){
     const autority = req.body.autority;
-    const countryCode = req.body.countryCode;
+    const countryCode = req.locals.countryCode;
     const dateOfExpiry = req.body.dateOfExpiry;
     const dateOfBirth = req.body.dateOfBirth;
     const dateOfIssue = req.body.dateOfIssue;
@@ -298,5 +311,50 @@ router.put('/passport/update', checkAuth, (req, res, next) => {
   }
 });
 
+//Recherche de passeports
 
+router.post('/passport/search', checkAuth, (req, res, next) => {
+  var info = {
+    autority: req.body.autority,
+    countryCode: res.locals.countryCode,
+    dateOfExpiry: req.body.dateOfExpiry,
+    dateOfBirth: req.body.dateOfBirth,
+    dateOfIssue: req.body.dateOfIssue,
+    eyesColor: req.body.eyesColor,
+    height: req.body.height,
+    name: req.body.name,
+    nationality: req.body.nationality,
+    passNb: req.body.passNb,
+    passOrigin: req.body.passOrigin,
+    placeOfBirth: req.body.placeOfBirth,
+    residence: req.body.residence,
+    sex: req.body.sex,
+    surname: req.body.surname,
+    type: req.body.type,
+    validity: req.body.validity
+  };
+  keys = ['autority', 'countryCode', 'dateOfExpiry', 'dateOfBirth', 'dateOfIssue', 'eyesColor', 'height', 'name', 'nationality', 'passNb', 'passOrigin', 'placeOfBirth', 'residence', 'sex', 'surname', 'type', 'validity'];
+  promisePassport.then((contract) => {
+    return contract.evaluateTransaction('searchPassportByCountry', info.countryCode); //On récupère les passeports d'un pays
+  }).then((buffer) => {
+    var passports = JSON.parse(buffer.toString());
+    keys.forEach(function(key) {
+      if (info[key] !== undefined){  
+        for (var ii =  0; ii< passports.length; ii++){
+          console.log(passports[ii].infos[key]);
+          if (passports[ii].infos[key] !== info[key]){
+            delete passports[ii];
+          }
+        }
+      }
+    });
+    var anwser = passports.filter(function(val){return val !== ''});
+    res.status(200).json(anwser);
+  }).catch((error) => {
+    res.status(200).json({
+      error
+    });
+  });
+
+});
 module.exports = router;

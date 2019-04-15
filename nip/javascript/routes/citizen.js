@@ -12,6 +12,7 @@ const promiseVisa = smartContract(1,'visa');
 
 var hash = require('object-hash');
 
+//Authentification
 router.post('/auth', (req, res, next) => {
     const passNb = req.body.passNb;
     const pwd = req.body.password;
@@ -50,7 +51,7 @@ router.post('/auth', (req, res, next) => {
     });
 });
 
-
+//Récupérer le passeport
 router.get('/passport', checkAuthCitizen , (req, res, next)=> {
     const passNb = res.locals.passNb;
     promisePassport.then( (contract) =>{
@@ -64,6 +65,7 @@ router.get('/passport', checkAuthCitizen , (req, res, next)=> {
     });
 });
 
+//Récupérer les Visas
 router.get('/visa', checkAuthCitizen , (req, res, next)=> {
     const passNb = res.locals.passNb;
     promiseVisa.then( (contract) =>{
@@ -76,6 +78,5 @@ router.get('/visa', checkAuthCitizen , (req, res, next)=> {
         });
     });
 });
-
 
 module.exports = router;
