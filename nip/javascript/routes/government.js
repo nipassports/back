@@ -189,7 +189,7 @@ router.get('/passport/one/:passNb', checkAuth, (req, res, next) => {
 router.put('/passport/update', checkAuth, (req, res, next) => {
   if(res.locals.admin){
     const autority = req.body.autority;
-    const countryCode = req.locals.countryCode;
+    const countryCode = res.locals.countryCode;
     const dateOfExpiry = req.body.dateOfExpiry;
     const dateOfBirth = req.body.dateOfBirth;
     const dateOfIssue = req.body.dateOfIssue;
