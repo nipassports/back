@@ -181,7 +181,7 @@
         }
       }
     },
-    "/government/all": {
+    "/government/passport/all": {
       "get": {
         "tags": [
           "Gouvernements"
@@ -209,7 +209,7 @@
         }
       }
     },
-    "/government/:{passNB}": {
+    "/government/passport/:{passNB}": {
       "get": {
         "tags": [
           "Gouvernements"
