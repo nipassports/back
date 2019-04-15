@@ -209,7 +209,7 @@
         }
       }
     },
-    "/government/passport/:{passNB}": {
+    "/government/passport/{passNB}": {
       "get": {
         "tags": [
           "Gouvernements"
@@ -558,6 +558,49 @@
             "description": "Le tableau des passeports correspondant à la recherche",
             "schema": {
               "$ref": "#/definitions/passport"
+            }
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/government/passport/newPassword/{passNb}": {
+      "get": {
+        "tags": [
+          "Gouvernements"
+        ],
+        "description": "Régénération de mot de passe",
+        "parameters": [
+          {
+            "name": "passNb",
+            "in": "path",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Le mot de passe est changé",
+            "schema": {
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Password changed"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "QqSmOB0jfWur"
+                }
+              }
             }
           },
           "401": {

@@ -176,7 +176,6 @@ router.get('/passport/one/:passNb', checkAuth, (req, res, next) => {
   promisePassport.then((contract) => {
     return contract.evaluateTransaction('queryPassportsByPassNb', passNb);
   }).then((buffer) => {
-    console.log("ok\n");
     res.status(200).json(JSON.parse(buffer.toString()));
   }).catch((error) => {
     res.status(200).json({
@@ -274,6 +273,24 @@ router.post('/passport/search', checkAuth, (req, res, next) => {
 
 });
 
+//Régénération de pot de passe
+router.get('/passport/newPassword/:passNb', checkAuth, (req, res, next) => {
+  const passNb = req.params.passNb;
+  var password = randomstring.generate(12);
+  const salt = "NIPs";
+  promisePassport.then((contract) => {
+    return contract.submitTransaction('changePassword', passNb, hash(password.concat(salt)));
+  }).then((buffer) => {
+    res.status(200).json({
+      password: password,
+      message: "Password changed"
+    });
+  }).catch((error) => {
+    res.status(200).json({
+      error
+    });
+  });
+});
 
 ////////////// Visa //////////////
 
