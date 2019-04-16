@@ -11,7 +11,7 @@ const path = require('path');
 
 async function contract(orgnum , chaine) {
 
-         const ccpPath = path.resolve(__dirname, '..', '..', 'first-network', 'connection'+orgnum+'.json');
+         const ccpPath = path.resolve(__dirname, '..', '..', 'nip-network', 'connection'+orgnum+'.json');
         const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
         const ccp = JSON.parse(ccpJSON);
         // Create a new file system based wallet for managing identities.
@@ -32,7 +32,7 @@ async function contract(orgnum , chaine) {
         await gateway.connect(ccp, { wallet, identity: 'user'+orgnum, discovery: { enabled: false } });
 
         // Get the network (channel) our contract is deployed to.
-        const network = await gateway.getNetwork('mychannel');
+        const network = await gateway.getNetwork('nipchannel');
 
         // Get the contract from the network.
         const contract = await network.getContract(chaine);
