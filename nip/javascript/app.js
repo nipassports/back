@@ -16,7 +16,7 @@ const adminRoute = require('./routes/admin');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mB'}));
 
 app.use((req, res, next) => {
     res.header('Access-control-Allow-Origin', '*');
