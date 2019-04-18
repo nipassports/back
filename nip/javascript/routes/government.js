@@ -3,9 +3,6 @@ const express = require('express');
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const router = express.Router();
-const mongoose = require("mongoose");
-const checkAuth = require('../middleware/check-authGovernment');
-const JWT_KEY = "secret-government";
 
 //Include pour les connexions (blockchain et mangoDB)
 const smartContract = require('../smartContract.js');
@@ -19,8 +16,6 @@ const JWT_KEY = "secret-government";
 var randomItem = require('random-item');
 var randomstring = require("randomstring");
 var hash = require('object-hash');
-const Problem = require('../models/problem');
-const GovernmentUser = require('../models/governmentUser');
 
 //Authentifiction
 router.post("/auth", (req, res, next) => {
@@ -72,14 +67,6 @@ router.post("/auth", (req, res, next) => {
       });
     });
 });
-
-router.get('/problems/all/:countryCode', checkAuth , (req, res, next) => {
-  const countryCode = req.params.countryCode;
-  console.log(countryCode);
-  Problem.find({ countryCode: countryCode}).sort({ date : -1 }).limit(10)
-    .then(problem => (problem) ? res.status(201).json(problem) : res.status(250).json({ message: "no problems declared " }))
-    .catch(err => console.log("err" + err))
-})
 
 
 ////////////// Passeports //////////////

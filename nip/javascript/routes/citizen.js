@@ -1,9 +1,7 @@
 // eslint-disable-next-line strict
 const express = require('express');
 const jwt = require("jsonwebtoken");
-const moment = require('moment');
 const router = express.Router();
-const mongoose = require("mongoose");
 const checkAuthCitizen = require('../middleware/check-auth.js');
 
 const JWT_KEY = "secret";
@@ -11,8 +9,6 @@ const JWT_KEY = "secret";
 const smartContract = require('../smartContract.js');
 const promisePassport = smartContract(1,'passport');
 const promiseVisa = smartContract(1,'visa');
-
-const Problem = require('../models/problem');
 
 var hash = require('object-hash');
 
@@ -55,34 +51,7 @@ router.post('/auth', (req, res, next) => {
     });
 });
 
-
-router.post('/problem', checkAuthCitizen , (req, res, next) => {
-    const problem=new Problem({
-        _id: new mongoose.Types.ObjectId(), 
-        passNb : res.locals.passNb,
-        message : req.body.message,
-        type : req.body.type,
-        date : moment().format('DD/MM/YYYY at HH:mm'),
-        author : 0,
-        status : "new"
-        });
-        problem
-        .save()
-        .then(result => {
-            console.log(result);
-            res.status(201).json({
-              message: "Problem sent"
-            });
-          })
-        .catch(err => {
-          console.log(err);
-          res.status(500).json({
-            error: err
-          });
-        });  
-});
-
-
+//Récupérer le passeport
 router.get('/passport', checkAuthCitizen , (req, res, next)=> {
     const passNb = res.locals.passNb;
     promisePassport.then( (contract) =>{
