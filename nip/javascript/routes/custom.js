@@ -2,6 +2,8 @@
 const express = require('express');
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const moment = require("moment");
+const mongoose = require("mongoose");
 const router = express.Router();
 const checkAuth = require('../middleware/check-authCustom.js');
 
@@ -13,6 +15,7 @@ const promiseVisa = smartContract(2, 'visa');
 
 var hash = require('object-hash');
 
+const Problem = require('../models/problem')
 const CustomUser = require('../models/customUser');
 
 //Authentifiction
@@ -60,6 +63,35 @@ router.post("/auth", (req, res, next) => {
     });
 });
 
+
+  //déclarer un probléme  
+  router.post('/problem', (req, res, next) => {
+    const problem=new Problem({
+        _id: new mongoose.Types.ObjectId(), 
+        passNb : req.body.passNb,
+        message : req.body.message,
+        countryCode : req.body.countryCode,
+        type : req.body.type,
+        date : moment().format('DD/MM/YYYY at HH:mm'),
+        author : 1,
+        status : 'new'
+        });
+        problem
+        .save()
+        .then(result => {
+            console.log(result);
+            res.status(201).json({
+              message: "Problem sent"
+            });
+          })
+        .catch(err => {
+          console.log(err);
+          res.status(500).json({
+            error: err
+          });
+        });  
+  });
+  
 
 ////////////// Passeports //////////////
 
