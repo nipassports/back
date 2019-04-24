@@ -489,65 +489,13 @@
                   "type": "string",
                   "example": "John"
                 },
-                "surname": {
-                  "type": "string",
-                  "example": "undefined"
-                },
-                "passNb": {
-                  "type": "string",
-                  "example": "undefined"
-                },
-                "countryCode": {
-                  "type": "string",
-                  "example": "undefined"
-                },
-                "dateOfBirth": {
-                  "type": "string",
-                  "example": "undefined"
-                },
-                "dateOfIssue": {
-                  "type": "string",
-                  "example": "undefined"
-                },
                 "dateOfExpiry": {
                   "type": "string",
                   "example": "22/07/2035"
                 },
-                "eyesColor": {
-                  "type": "string",
-                  "example": "undefined"
-                },
-                "height": {
-                  "type": "string",
-                  "example": "undefined"
-                },
-                "nationality": {
-                  "type": "string",
-                  "example": "undefined"
-                },
-                "passOrigin": {
-                  "type": "string",
-                  "example": "undefined"
-                },
-                "placeOfBirth": {
-                  "type": "string",
-                  "example": "undefined"
-                },
-                "residence": {
-                  "type": "string",
-                  "example": "undefined"
-                },
                 "sex": {
                   "type": "string",
                   "example": "M"
-                },
-                "type": {
-                  "type": "string",
-                  "example": "undefined"
-                },
-                "validity": {
-                  "type": "string",
-                  "example": "undefined"
                 }
               }
             }
