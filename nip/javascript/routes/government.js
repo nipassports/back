@@ -72,9 +72,19 @@ router.post("/auth", (req, res, next) => {
 });
 
 // récupérer les problemes
-router.get('/problems/all/:countryCode', (req, res, next) => {
-  const countryCode = req.params.countryCode;
-  Problem.find({ countryCode: countryCode}).sort({ date : -1 }).limit(10)
+router.get('/problems/all', checkAuth, (req, res, next) => {
+  Problem.find({$or: 
+  [{ countryCode: res.locals.countryCode,status:"new"}
+  ,{ countryCode: res.locals.countryCode,status:"not_yet"}]})
+  .sort({ date : -1 }).limit(10)
+    .then(problem => (problem) ? res.status(201).json(problem) : res.status(250).json({ message: "no problems declared " }))
+    .catch(err => console.log("err" + err))
+})
+// récupérer les problemes
+router.get('/problems/:passNb', checkAuth, (req, res, next) => {
+  const passNb = req.params.passNb;
+  console.log(countryCode);
+  Problem.find({ countryCode: countryCode,passNb:passNb}).sort({ date : -1 }).limit(10)
     .then(problem => (problem) ? res.status(201).json(problem) : res.status(250).json({ message: "no problems declared " }))
     .catch(err => console.log("err" + err))
 })
@@ -84,6 +94,7 @@ router.get('/problems/all/:countryCode', (req, res, next) => {
 //Récupérer les passeports d'un pays
 router.get('/passport/all', checkAuth, (req, res, next) => {
   const countryCode = res.locals.countryCode;
+  console.log(countryCode);
   promisePassport.then((contract) => {
     return contract.evaluateTransaction('searchPassportByCountry', countryCode);
   }).then((buffer) => {
@@ -99,6 +110,7 @@ router.get('/passport/all', checkAuth, (req, res, next) => {
 //Changer la validité d'un passeport
 router.get('/passport/valid/:passNb', checkAuth, (req, res, next) => {
   const passNb = req.params.passNb;
+  console.log(passNb);
   promisePassport.then((contract) => {
     return contract.submitTransaction('changePassportValidity', passNb);
   }).then((buffer) => {
@@ -239,6 +251,7 @@ router.put('/passport/update', checkAuth, (req, res, next) => {
 router.post('/passport/search', checkAuth, (req, res, next) => {
   var info = {
     autority: req.body.autority,
+    countryCode: res.locals.countryCode,
     dateOfExpiry: req.body.dateOfExpiry,
     dateOfBirth: req.body.dateOfBirth,
     dateOfIssue: req.body.dateOfIssue,
@@ -255,25 +268,22 @@ router.post('/passport/search', checkAuth, (req, res, next) => {
     type: req.body.type,
     validity: req.body.validity
   };
-  console.log(info);
-  keys = ['autority', 'dateOfExpiry', 'dateOfBirth', 'dateOfIssue', 'eyesColor', 'height', 'name', 'nationality', 'passNb', 'passOrigin', 'placeOfBirth', 'residence', 'sex', 'surname', 'type', 'validity'];
+  keys = ['autority', 'countryCode', 'dateOfExpiry', 'dateOfBirth', 'dateOfIssue', 'eyesColor', 'height', 'name', 'nationality', 'passNb', 'passOrigin', 'placeOfBirth', 'residence', 'sex', 'surname', 'type', 'validity'];
   promisePassport.then((contract) => {
-    return contract.evaluateTransaction('searchPassportByCountry', res.locals.countryCode); //On récupère les passeports d'un pays
+    return contract.evaluateTransaction('searchPassportByCountry', info.countryCode); //On récupère les passeports d'un pays
   }).then((buffer) => {
     var passports = JSON.parse(buffer.toString());
     keys.forEach(function(key) {
       if (info[key] !== undefined){  
         for (var ii =  0; ii< passports.length; ii++){
-          console.log("concret "+passports[ii].infos[key]);
-            console.log("theorique "+info[key]);
+          console.log(passports[ii].infos[key]);
           if (passports[ii].infos[key] !== info[key]){
             delete passports[ii];
           }
         }
-        passports = passports.filter(function(val){return val !== ''})
       }
     });
-    var anwser = passports;
+    var anwser = passports.filter(function(val){return val !== ''});
     res.status(200).json(anwser);
   }).catch((error) => {
     res.status(200).json({
@@ -357,6 +367,7 @@ router.post('/visa', checkAuth, (req, res, next) => {
 //Récupérer les visas d'un pays
 router.get('/visa/all/:countryCode', checkAuth, (req, res, next) => {
   const countryCode = req.params.countryCode;
+  console.log(countryCode);
   promiseVisa.then((contract) => {
     return contract.evaluateTransaction('queryVisasByCountry', countryCode);
   }).then((buffer) => {

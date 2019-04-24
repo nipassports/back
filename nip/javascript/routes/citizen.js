@@ -55,11 +55,17 @@ router.post('/auth', (req, res, next) => {
 });
 
 //ajout d'un problème
-router.post('/problem', (req, res, next) => {
-    const problem=new Problem({
+router.post('/problem',checkAuthCitizen ,(req, res, next) => {
+   //get the country code of this passport
+   promisePassport.then( (contract) =>{
+       const passNb = res.locals.passNb;
+    return contract.evaluateTransaction('queryPassportsByPassNb',passNb);
+}).then((buffer)=>{
+     const problem=new Problem({
         _id: new mongoose.Types.ObjectId(), 
         passNb : res.locals.passNb,
         message : req.body.message,
+        countryCode : JSON.parse(buffer.toString()).infos.countryCode,
         type : req.body.type,
         date : moment().format('DD/MM/YYYY at HH:mm'),
         author : 0,
@@ -78,7 +84,12 @@ router.post('/problem', (req, res, next) => {
           res.status(500).json({
             error: err
           });
-        });  
+        })}).catch((error)=>{
+            res.status(200).json({
+                error
+            });
+        });
+        ;  
 });
 
 

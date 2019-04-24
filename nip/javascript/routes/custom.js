@@ -65,7 +65,7 @@ router.post("/auth", (req, res, next) => {
 
 
   //déclarer un probléme  
-  router.post('/problem', (req, res, next) => {
+  router.post('/problem',  checkAuth,(req, res, next) => {
     const problem=new Problem({
         _id: new mongoose.Types.ObjectId(), 
         passNb : req.body.passNb,
