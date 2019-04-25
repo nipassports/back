@@ -8,7 +8,7 @@
     "http",
     "https"
   ],
-  "host": "192.168.0.100:4200",
+  "host": "nip.ddns.net:3000",
   "paths": {
     "/citizen/auth": {
       "post": {
@@ -110,6 +110,34 @@
             "schema": {
               "$ref": "#/definitions/visa"
             }
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/citizen/problem": {
+      "post": {
+        "tags": [
+          "Citoyens"
+        ],
+        "summary": "Ajout d'un problème par un citoyen",
+        "parameters": [
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Réponse normale"
+          },
+          "201": {
+            "description": "Problem sent"
           },
           "401": {
             "$ref": "#/responses/Standard401ErrorResponse"
@@ -489,13 +517,65 @@
                   "type": "string",
                   "example": "John"
                 },
+                "surname": {
+                  "type": "string",
+                  "example": "undefined"
+                },
+                "passNb": {
+                  "type": "string",
+                  "example": "undefined"
+                },
+                "countryCode": {
+                  "type": "string",
+                  "example": "undefined"
+                },
+                "dateOfBirth": {
+                  "type": "string",
+                  "example": "undefined"
+                },
+                "dateOfIssue": {
+                  "type": "string",
+                  "example": "undefined"
+                },
                 "dateOfExpiry": {
                   "type": "string",
                   "example": "22/07/2035"
                 },
+                "eyesColor": {
+                  "type": "string",
+                  "example": "undefined"
+                },
+                "height": {
+                  "type": "string",
+                  "example": "undefined"
+                },
+                "nationality": {
+                  "type": "string",
+                  "example": "undefined"
+                },
+                "passOrigin": {
+                  "type": "string",
+                  "example": "undefined"
+                },
+                "placeOfBirth": {
+                  "type": "string",
+                  "example": "undefined"
+                },
+                "residence": {
+                  "type": "string",
+                  "example": "undefined"
+                },
                 "sex": {
                   "type": "string",
                   "example": "M"
+                },
+                "type": {
+                  "type": "string",
+                  "example": "undefined"
+                },
+                "validity": {
+                  "type": "string",
+                  "example": "undefined"
                 }
               }
             }
@@ -687,6 +767,63 @@
             "schema": {
               "$ref": "#/definitions/visa"
             }
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/government/problems/all": {
+      "get": {
+        "tags": [
+          "Gouvernements"
+        ],
+        "summary": "Liste tous les problèmes du pays",
+        "parameters": [
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retourne la liste des problèmes"
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/government/problems/:{passNb}": {
+      "get": {
+        "tags": [
+          "Gouvernements"
+        ],
+        "summary": "Liste tous les problèmes d'un citoyen",
+        "parameters": [
+          {
+            "name": "passNb",
+            "in": "path",
+            "required": true,
+            "description": "le numéro du passeport voulu",
+            "type": "string"
+          },
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retourne la liste des problèmes d'un citoyen"
           },
           "401": {
             "$ref": "#/responses/Standard401ErrorResponse"
@@ -966,6 +1103,34 @@
             "schema": {
               "$ref": "#/definitions/visa"
             }
+          },
+          "401": {
+            "$ref": "#/responses/Standard401ErrorResponse"
+          }
+        }
+      }
+    },
+    "/customs/problem": {
+      "post": {
+        "tags": [
+          "Douanes"
+        ],
+        "summary": "Ajout d'un problème par les douanes",
+        "parameters": [
+          {
+            "name": "Authorizations",
+            "in": "header",
+            "required": true,
+            "description": "Token d'authentification",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Réponse normale"
+          },
+          "201": {
+            "description": "Problem sent"
           },
           "401": {
             "$ref": "#/responses/Standard401ErrorResponse"

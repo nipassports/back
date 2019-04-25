@@ -83,7 +83,7 @@ router.get('/problems/all', checkAuth, (req, res, next) => {
 // récupérer les problemes
 router.get('/problems/:passNb', checkAuth, (req, res, next) => {
   const passNb = req.params.passNb;
-  console.log(countryCode);
+  console.log("Demande du pays: "+countryCode);
   Problem.find({ countryCode: countryCode,passNb:passNb}).sort({ date : -1 }).limit(10)
     .then(problem => (problem) ? res.status(201).json(problem) : res.status(250).json({ message: "no problems declared " }))
     .catch(err => console.log("err" + err))
@@ -94,7 +94,7 @@ router.get('/problems/:passNb', checkAuth, (req, res, next) => {
 //Récupérer les passeports d'un pays
 router.get('/passport/all', checkAuth, (req, res, next) => {
   const countryCode = res.locals.countryCode;
-  console.log(countryCode);
+  console.log("Demande du pays: "+countryCode);
   promisePassport.then((contract) => {
     return contract.evaluateTransaction('searchPassportByCountry', countryCode);
   }).then((buffer) => {
@@ -110,7 +110,6 @@ router.get('/passport/all', checkAuth, (req, res, next) => {
 //Changer la validité d'un passeport
 router.get('/passport/valid/:passNb', checkAuth, (req, res, next) => {
   const passNb = req.params.passNb;
-  console.log(passNb);
   promisePassport.then((contract) => {
     return contract.submitTransaction('changePassportValidity', passNb);
   }).then((buffer) => {
@@ -249,9 +248,8 @@ router.put('/passport/update', checkAuth, (req, res, next) => {
 
 //Recherche de passeports
 router.post('/passport/search', checkAuth, (req, res, next) => {
-  var info = {
+  const info = {
     autority: req.body.autority,
-    countryCode: res.locals.countryCode,
     dateOfExpiry: req.body.dateOfExpiry,
     dateOfBirth: req.body.dateOfBirth,
     dateOfIssue: req.body.dateOfIssue,
@@ -268,23 +266,23 @@ router.post('/passport/search', checkAuth, (req, res, next) => {
     type: req.body.type,
     validity: req.body.validity
   };
-  keys = ['autority', 'countryCode', 'dateOfExpiry', 'dateOfBirth', 'dateOfIssue', 'eyesColor', 'height', 'name', 'nationality', 'passNb', 'passOrigin', 'placeOfBirth', 'residence', 'sex', 'surname', 'type', 'validity'];
+  keys = ['autority', 'dateOfExpiry', 'dateOfBirth', 'dateOfIssue', 'eyesColor', 'height', 'name', 'nationality', 'passNb', 'passOrigin', 'placeOfBirth', 'residence', 'sex', 'surname', 'type', 'validity'];
   promisePassport.then((contract) => {
-    return contract.evaluateTransaction('searchPassportByCountry', info.countryCode); //On récupère les passeports d'un pays
+    return contract.evaluateTransaction('searchPassportByCountry', res.locals.countryCode); //On récupère les passeports d'un pays
   }).then((buffer) => {
     var passports = JSON.parse(buffer.toString());
     keys.forEach(function(key) {
       if (info[key] !== undefined){  
-        for (var ii =  0; ii< passports.length; ii++){
-          console.log(passports[ii].infos[key]);
+        for (var ii =  0; ii< passports.length; ii++){;
           if (passports[ii].infos[key] !== info[key]){
             delete passports[ii];
           }
         }
+	passports = passports.filter(function(val){return val !== ''});
       }
     });
-    var anwser = passports.filter(function(val){return val !== ''});
-    res.status(200).json(anwser);
+    console.log(passports.length + "passeports correspondent à la recherche");
+    res.status(200).json(passports);
   }).catch((error) => {
     res.status(200).json({
       error
