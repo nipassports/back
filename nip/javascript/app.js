@@ -7,6 +7,9 @@ var swaggerUi = require('swagger-ui-express');
 var swaggerDocument = require('./swagger.json');
 const mongoose  = require('mongoose');
 
+const smartContract = require('./smartContract.js');
+const promisePassport = smartContract(3,'passport');
+
 mongoose.connect('mongodb+srv://ozemzami:7ZuoZkVIJcYjpb2l@nips-q4sgv.mongodb.net/test?retryWrites=true', { useNewUrlParser: true })
 
 const citizenRoute = require('./routes/citizen');
@@ -45,6 +48,39 @@ app.use((error, req, res, next) =>{
         }
     });
 });
+
+const requestLoop = setInterval(function(){
+    promisePassport.then( (contract) =>{
+        return contract.evaluateTransaction('queryAllPassports');
+    }).then((buffer)=>{
+        let passports = JSON.parse(buffer.toString());
+        passports.forEach(passport => {
+            let sdate=passport.infos.dateOfExpiry;
+            let date1= new Date();
+            let today= new Date();
+            date1.setFullYear(sdate.substr(6,4));
+            date1.setMonth(sdate.substr(3,2));
+            date1.setDate(sdate.substr(0,2));
+            date1.setHours(0);
+            date1.setMinutes(0);
+            date1.setSeconds(0);
+            date1.setMilliseconds(0);
+            let d1=date1.getTime();
+            if(d1< today.getTime()){
+                promisePassport.then( (contract) =>{
+                    return contract.submitTransaction('changePassportValidity', passport.infos.passNb);
+                }).then((buffer) => {
+                    console.log("Validity changed");
+                });
+            }else{
+                console.log("no changes");
+            }
+        });
+            
+        });
+
+    
+}, 86400000);
 
 
 module.exports = app;
