@@ -94,6 +94,14 @@ router.post("/auth", (req, res, next) => {
         });  
   });
   
+//recevoir un probleme
+
+router.get('/problems/:passNb', checkAuth, (req, res, next) => {
+  const passNb = req.params.passNb;
+  Problem.find({passNb:passNb}).sort({ date : -1 }).limit(10)
+    .then(problem => (problem) ? res.status(201).json(problem) : res.status(250).json({ message: "no problems declared " }))
+    .catch(err => console.log("err" + err))
+})
 
 ////////////// Passeports //////////////
 

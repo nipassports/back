@@ -76,7 +76,7 @@ router.post("/auth", (req, res, next) => {
 router.get('/problems/all', checkAuth, (req, res, next) => {
   Problem.find({$or: 
   [{ countryCode: res.locals.countryCode,status:"new"}
-  ,{ countryCode: res.locals.countryCode,status:"not_yet"}]})
+  ,{ countryCode: res.locals.countryCode,status:"treated"}]})
   .sort({ date : -1 }).limit(10)
     .then(problem => (problem) ? res.status(201).json(problem) : res.status(250).json({ message: "no problems declared " }))
     .catch(err => console.log("err" + err))
@@ -92,18 +92,28 @@ router.get('/problems/:passNb', checkAuth, (req, res, next) => {
 router.post('/problems/:id', checkAuth, (req, res, next) => {
   
   Problem.findOne({ _id : ObjectID(req.params.id)})
-    .then(problem => {
-      console.log(problem.countryCode);
-      old=problem;
-      problem.status="treated";
-      console.log(problem.status);
-      console.log(old.status);
-      if (problem!==null){
-
-    res.status(201).json(problem)}
-     else{
-      res.status(250).json({ message: "no problems with this id is found " })}})
-    .catch(err => console.log("err" + err))
+  .then(problem => {
+    console.log(problem.countryCode);
+    old=problem;
+    problem.status="treated";
+   
+    if (problem!==null){
+      Problem.updateOne({_id : ObjectID(req.params.id)},problem,{upsert:true}).then(
+        result => {
+          console.log(problem.status);
+          console.log(old.status);
+          console.log(result);
+          res.status(201).json({
+            message: "status  modified"
+            })} );
+          }
+        else {
+          res.status(201).json({
+            message: "problem not found"
+          })
+        }
+      }
+      ).catch(err => console.log("err" + err))
 })
 
 ////////////// Passeports //////////////
