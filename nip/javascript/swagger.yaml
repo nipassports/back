@@ -1,32 +1,916 @@
-swagger: "2.0"
-
+swagger: '2.0'
 info:
-  version: 1.0.0
-  title: Simple API
-  description: A simple API to learn how to write OpenAPI Specification
-
+  version: 1.4.1
+  title: NIPs API
 schemes:
+  - http
   - https
-host: simple.api
-basePath: /openapi101
-
+host: 'nip.ddns.net:3000'
 paths:
-  /persons:
-    get:
-      summary: Gets some persons
-      description: Returns a list containing all persons.
-      responses:
-        200:
-          description: A list of Person
+  /citizen/auth:
+    post:
+      tags:
+        - Citoyens
+      summary: Authentification des citoyens
+      parameters:
+        - name: identifiants
+          in: body
+          description: Les identifiants
           schema:
-            type: array
-            items:
-              required:
-                - username
-              properties:
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                username:
-                  type: string
+            required:
+              - passNb
+              - password
+            properties:
+              passNb:
+                type: string
+                example: F2Z1289
+              password:
+                type: string
+                example: azerty
+      responses:
+        '200':
+          description: Authentification réussie
+          schema:
+            properties:
+              message:
+                type: string
+                example: Auth successful
+              token:
+                type: string
+                example: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWFudCI6ImN1c3RvbUJvYiIsInBhc3N3b3JkIjoiJDJiJDEwJHY1TDdmWk5sQVNoaGNBVDJuODB2ME9nZDlZQ2M3L2JqS25JbW56Y0FXaEg2SldVeEdQRS82IiwiaWF0IjoxNTU1MzI4NjA5LCJleHAiOjE1NTUzMjg5MDl9.LDnfu8rw7pp-MdTq_a7RSIXtGEcJzKQ0usmJGnEtWEA
+        '401':
+          $ref: '#/responses/Authfailed'
+  /citizen/passport:
+    get:
+      tags:
+        - Citoyens
+      summary: Consulation de son passeport
+      parameters:
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Le passeport du citoyen
+          schema:
+            $ref: '#/definitions/passport'
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  /citizen/visa:
+    get:
+      tags:
+        - Citoyens
+      summary: Consulation de ses visas
+      parameters:
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Un tableau des visas du citoyen
+          schema:
+            $ref: '#/definitions/visa'
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  /citizen/problem:
+    post:
+      tags:
+        - Citoyens
+      summary: Ajout d'un problème par un citoyen
+      parameters:
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Réponse normale
+        '201':
+          description: "Problem sent"
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  /government/auth:
+    post:
+      tags:
+        - Gouvernements
+      summary: Authentification des gouvernements
+      parameters:
+        - name: identifiants
+          in: body
+          description: Les identifiants
+          schema:
+            required:
+              - identifiant
+              - password
+            properties:
+              identifiant:
+                type: string
+                example:
+                  - governmentFR
+                  - governmentAdminFR
+                  - governmentEN
+                  - governmentAdminEN
+              password:
+                type: string
+                example: azerty
+      responses:
+        '200':
+          description: Authentification réussie
+          schema:
+            properties:
+              message:
+                type: string
+                example: Auth successful
+              token:
+                type: string
+                example: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWFudCI6ImN1c3RvbUJvYiIsInBhc3N3b3JkIjoiJDJiJDEwJHY1TDdmWk5sQVNoaGNBVDJuODB2ME9nZDlZQ2M3L2JqS25JbW56Y0FXaEg2SldVeEdQRS82IiwiaWF0IjoxNTU1MzI4NjA5LCJleHAiOjE1NTUzMjg5MDl9.LDnfu8rw7pp-MdTq_a7RSIXtGEcJzKQ0usmJGnEtWEA
+              countryCode:
+                type: string
+                example: FR
+              admin:
+                type: boolean
+                example: true
+        '401':
+          $ref: '#/responses/Authfailed'
+  /government/passport/all:
+    get:
+      tags:
+        - Gouvernements
+      summary: Liste des passeports d'un gouvernement
+      parameters:
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Le tableau des passeports du gouvernement
+          schema:
+            $ref: '#/definitions/passport'
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  '/government/passport/{passNB}':
+    get:
+      tags:
+        - Gouvernements
+      summary: Récupération d'un passeport
+      parameters:
+        - name: passNB
+          in: path
+          required: true
+          description: le numéro du passeport voulu
+          type: string
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Le passeport voulu
+          schema:
+            $ref: '#/definitions/passport'
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  /government/passport:
+    post:
+      tags:
+        - Gouvernements
+      summary: Création d'un passeport
+      parameters:
+        - name: passport
+          in: body
+          description: les informations du passeport
+          schema:
+            $ref: '#/definitions/passport'
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Création Réussie
+          schema:
+            properties:
+              message:
+                type: string
+                example: Transaction has been submitted
+              password:
+                type: string
+                example: azerty
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  '/government/passport/random':
+    get:
+      tags:
+        - Gouvernements
+      description: Génération aléatoire d'identité
+      responses:
+        '200':
+          description: Les données du passeport sans le countryCode
+          schema:
+            properties:
+              name:
+                type: string
+                example: John
+              surname:
+                type: string
+                example: Smith
+              passNb:
+                type: string
+                example: F2Z1289
+              autority:
+                type: string
+                example: 'Préfecture de '
+              dateOfBirth:
+                type: string
+                example: 12/02/1948
+              dateOfIssue:
+                type: string
+                example: 23/07/2015
+              dateOfExpiry:
+                type: string
+                example: 22/07/2035
+              eyesColor:
+                type: string
+                example: green
+              height:
+                type: string
+                example: '1.75'
+              image:
+                type: string
+                example: image converted
+              nationality:
+                type: string
+                example: belgium
+              passOrigin:
+                type: string
+                example: United States
+              placeOfBirth:
+                type: string
+                example: New York
+              residence:
+                type: string
+                example: Bruxelles
+              sex:
+                type: string
+                example: M
+              type:
+                type: string
+                example: P
+              validity:
+                type: string
+                example: Valide
+  '/government/passport/valid/{passNb}':
+    get:
+      tags:
+        - Gouvernements
+      summary: Change la validité du passeport
+      parameters:
+        - name: passNb
+          in: path
+          description: le numéro du passeport à changer
+          required: true
+          type: string
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: La validité a été changée
+          schema:
+            properties:
+              message:
+                type: string
+                example: Validity changed
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  '/government/passport/update':
+    put:
+      tags:
+        - Gouvernements
+      summary: Modifie un passeport
+      description: Seul les users admins peuvent modifier un passeport
+      parameters:
+        - name: passeport
+          in: body
+          description: Les nouvelles informations du passeport
+          schema:
+            $ref: '#/definitions/passport'
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: La mise à jour est prise en compte
+          schema:
+            properties:
+              message:
+                type: string
+                example: Transaction has been submitted
+        '401':
+          description: Accès interdit
+          schema:
+            properties:
+              message:
+                type: string
+                example: no right
+  '/government/passport/search':
+    post:
+      tags:
+        - Gouvernements
+      description: Recherche multi-critère des passports du gouvernement
+      parameters:
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+        - name: informations
+          in: body
+          required: true
+          description: les critères de recherche
+          schema:
+            properties:
+              name:
+                type: string
+                example: John
+              surname:
+                type: string
+                example: undefined
+              passNb:
+                type: string
+                example: undefined
+              countryCode:
+                type: string
+                example: undefined
+              dateOfBirth:
+                type: string
+                example: undefined
+              dateOfIssue:
+                type: string
+                example: undefined
+              dateOfExpiry:
+                type: string
+                example: 22/07/2035
+              eyesColor:
+                type: string
+                example: undefined
+              height:
+                type: string
+                example: undefined
+              nationality:
+                type: string
+                example: undefined
+              passOrigin:
+                type: string
+                example: undefined
+              placeOfBirth:
+                type: string
+                example: undefined
+              residence:
+                type: string
+                example: undefined
+              sex:
+                type: string
+                example: M
+              type:
+                type: string
+                example: undefined
+              validity:
+                type: string
+                example: undefined
+      responses:
+        '200':
+          description: Le tableau des passeports correspondant à la recherche
+          schema:
+            $ref: '#/definitions/passport'
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  
+  '/government/passport/newPassword/{passNb}':
+    get:
+      tags:
+        - Gouvernements
+      description: Régénération de mot de passe
+      parameters:
+        - name: passNb
+          in: path
+          type: string
+          required: true
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string 
+      responses:
+        '200':
+          description: Le mot de passe est changé
+          schema:
+            properties:
+              message:
+                type: string
+                example: Password changed
+              password:
+                type: string
+                example: QqSmOB0jfWur
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+      
+  /government/visa:
+    post:
+      tags:
+        - Gouvernements
+      summary: Création d'un visa
+      parameters:
+        - name: person
+          in: body
+          description: The visa to create.
+          schema:
+            $ref: '#/definitions/visa'
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Le visa est créé
+          schema:
+            properties:
+              message:
+                type: string
+                example: Transaction has been submitted
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+    get:
+      tags:
+        - Gouvernements
+      summary: Récupération de la liste des visas
+      parameters:
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Le tableau de tous les visas
+          schema:
+            $ref: '#/definitions/visa'
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  '/government/visa/all/:{countryCode}':
+    get:
+      tags:
+        - Gouvernements
+      summary: Récupération de la liste des visas d'un pays
+      parameters:
+        - name: countryCode
+          in: path
+          required: true
+          description: l'identifiant du pays
+          type: string
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Tableau des visas d'un pays
+          schema:
+            $ref: '#/definitions/visa'
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  '/government/visa/one/:{passNb}':
+    get:
+      tags:
+        - Gouvernements
+      summary: Récupération d'un visas
+      parameters:
+        - name: passNb
+          in: path
+          required: true
+          description: le numéro du passeport voulu
+          type: string
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Tableau des visas d'un citoyen
+          schema:
+            $ref: '#/definitions/visa'
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  
+  /government/problems/all:
+    get:
+      tags:
+        - Gouvernements
+      summary: Liste tous les problèmes du pays
+      parameters:
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Retourne la liste des problèmes
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  
+  /government/problems/:{passNb}:
+    get:
+      tags:
+        - Gouvernements
+      summary: Liste tous les problèmes d'un citoyen
+      parameters:
+        - name: passNb
+          in: path
+          required: true
+          description: le numéro du passeport voulu
+          type: string
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Retourne la liste des problèmes d'un citoyen
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+          
+          
+  /custom/auth:
+    post:
+      tags:
+        - Douanes
+      summary: Authentification des douanes
+      parameters:
+        - name: identifiants
+          in: body
+          description: Les identifiants du douanier
+          schema:
+            required:
+              - identifiant
+              - password
+            properties:
+              identifiant:
+                type: string
+                example: customBob
+              password:
+                type: string
+                example: customBob
+      responses:
+        '200':
+          description: Authentification réussie
+          schema:
+            properties:
+              message:
+                type: string
+                example: Auth successful
+              token:
+                type: string
+                example: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWFudCI6ImN1c3RvbUJvYiIsInBhc3N3b3JkIjoiJDJiJDEwJHY1TDdmWk5sQVNoaGNBVDJuODB2ME9nZDlZQ2M3L2JqS25JbW56Y0FXaEg2SldVeEdQRS82IiwiaWF0IjoxNTU1MzI4NjA5LCJleHAiOjE1NTUzMjg5MDl9.LDnfu8rw7pp-MdTq_a7RSIXtGEcJzKQ0usmJGnEtWEA
+        '401':
+          $ref: '#/responses/Authfailed'
+  /custom/passport:
+    get:
+      tags:
+        - Douanes
+      summary: Liste des passeports
+      parameters:
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Retourne le tableau des passeports
+          schema:
+            $ref: '#/definitions/passport'
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  '/custom/passport/:{passNb}':
+    get:
+      tags:
+        - Douanes
+      description: Récupération d'un passeport
+      parameters:
+        - name: passNb
+          in: path
+          required: true
+          description: Numéro du passeport  voulu
+          type: string
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Le passeport du citoyens
+          schema:
+            $ref: '#/definitions/passport'
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  /custom/passport/search:
+    post:
+      tags:
+        - Douanes
+      description: Recherche multi-critère des passports
+      parameters:
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+        - name: informations
+          in: body
+          required: true
+          description: les critères de recherche
+          schema:
+            properties:
+              name:
+                type: string
+                example: John
+              surname:
+                type: string
+                example: undefined
+              passNb:
+                type: string
+                example: undefined
+              countryCode:
+                type: string
+                example: undefined
+              dateOfBirth:
+                type: string
+                example: undefined
+              dateOfIssue:
+                type: string
+                example: undefined
+              dateOfExpiry:
+                type: string
+                example: 22/07/2035
+              eyesColor:
+                type: string
+                example: undefined
+              height:
+                type: string
+                example: undefined
+              nationality:
+                type: string
+                example: undefined
+              passOrigin:
+                type: string
+                example: undefined
+              placeOfBirth:
+                type: string
+                example: undefined
+              residence:
+                type: string
+                example: undefined
+              sex:
+                type: string
+                example: M
+              type:
+                type: string
+                example: undefined
+              validity:
+                type: string
+                example: undefined
+      responses:
+        '200':
+          description: Le tableau des passeports correspondant à la recherche
+          schema:
+            $ref: '#/definitions/passport'
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  /custom/visa:
+    get:
+      tags:
+        - Douanes
+      summary: Récupération de la liste des visas
+      parameters:
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Le tableau de l'ensemble des visas
+          schema:
+            $ref: '#/definitions/visa'
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+  '/custom/visa/:{passNb}':
+    get:
+      tags:
+        - Douanes
+      summary: Récupération des visas d'un passeport
+      parameters:
+        - name: passNb
+          in: path
+          required: true
+          description: le numéro du citoyen des visas voulu
+          type: string
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: le tableau des visas du citoyen
+          schema:
+            $ref: '#/definitions/visa'
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'
+          
+  /customs/problem:
+    post:
+      tags:
+        - Douanes
+      summary: Ajout d'un problème par les douanes
+      parameters:
+        - name: Authorizations
+          in: header
+          required: true
+          description: Token d'authentification
+          type: string
+      responses:
+        '200':
+          description: Réponse normale
+        '201':
+          description: "Problem sent"
+        '401':
+          $ref: '#/responses/Standard401ErrorResponse'       
+  
+definitions:
+  passport:
+    required:
+      - autority
+      - countryCode
+      - dateOfBirth
+      - dateOfExpiry
+      - dateOfIssue
+      - eyesColor
+      - height
+      - image
+      - name
+      - nationality
+      - passNb
+      - passOrigin
+      - placeOfBirth
+      - residence
+      - sex
+      - surname
+      - type
+      - validity
+    properties:
+      name:
+        type: string
+        example: John
+      surname:
+        type: string
+        example: Smith
+      passNb:
+        type: string
+        example: F2Z1289
+      countryCode:
+        type: string
+        example: FR
+      autority:
+        type: string
+        example: 'Préfecture de '
+      dateOfBirth:
+        type: string
+        example: 12/02/1948
+      dateOfIssue:
+        type: string
+        example: 23/07/2015
+      dateOfExpiry:
+        type: string
+        example: 22/07/2035
+      eyesColor:
+        type: string
+        example: green
+      height:
+        type: string
+        example: '1.75'
+      image:
+        type: string
+        example: image converted
+      nationality:
+        type: string
+        example: belgium
+      passOrigin:
+        type: string
+        example: United States
+      placeOfBirth:
+        type: string
+        example: New York
+      residence:
+        type: string
+        example: Bruxelles
+      sex:
+        type: string
+        example: M
+      type:
+        type: string
+        example: P
+      validity:
+        type: string
+        example: Valide
+  visa:
+    required:
+      - autority
+      - dateOfExpiry
+      - dateOfIssue
+      - durationOfStay
+      - name
+      - numberOfEntries
+      - placeOfIssue
+      - remarks
+      - surname
+      - type
+      - validFor
+      - validity
+      - visaCode
+    properties:
+      autority:
+        type: string
+        example: FRA
+      name:
+        type: string
+        example: Brad
+      surname:
+        type: string
+        example: Dupont
+      dateOfExpiry:
+        type: string
+        example: 16/09/2022
+      dateOfIssue:
+        type: string
+        example: 16/09/2018
+      durationOfStay:
+        type: string
+        example: '400'
+      placeOfIssue:
+        type: string
+        example: Toulouse
+      numberOfEntries:
+        type: string
+        example: MULT
+      type:
+        type: string
+        example: P
+      validFor:
+        type: string
+        example: SCHENGEN
+      validity:
+        type: string
+        example: Valide
+      visaCode:
+        type: string
+        example: '9872837'
+      remarks:
+        type: string
+        example: CESSEDA R313-3 1
+responses:
+  Standard401ErrorResponse:
+    description: Le token n'est pas valide
+    schema:
+      properties:
+        message:
+          type: string
+          example: auth failed
+  Authfailed:
+    description: L'identifiant ou le mot de passe est incorrect
+    schema:
+      properties:
+        message:
+          type: string
+          example: auth failed

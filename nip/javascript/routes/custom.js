@@ -124,7 +124,7 @@ router.get('/passport/:passNb', checkAuth, (req, res, next) => {
 
 //Recherche de passeports
 router.post('/passport/search', checkAuth, (req, res, next) => {
-  var info = {
+  const info = {
     autority: req.body.autority,
     countryCode: req.body.countryCode,
     dateOfExpiry: req.body.dateOfExpiry,
@@ -156,12 +156,11 @@ router.post('/passport/search', checkAuth, (req, res, next) => {
             delete passports[ii];
           }
         }
+	passports = passports.filter(function(val){return val !== ''});
       }
     });
-    var anwser = passports.filter(function (val) {
-      return val !== ''
-    });
-    res.status(200).json(anwser);
+    console.log(passports.length + "passeports correspondent à la recherche");
+    res.status(200).json(passports);
   }).catch((error) => {
     res.status(200).json({
       error
