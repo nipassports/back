@@ -2,3 +2,15 @@
 first-network
 
 nip-network/
+
+config/
+
+chaincode/
+
+bin/
+
+create_bin\.sh
+
+nip/startFabric\.sh
+
+nip/actionsPostStart\.sh

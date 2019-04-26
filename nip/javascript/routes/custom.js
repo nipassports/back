@@ -73,6 +73,8 @@ router.post("/auth", (req, res, next) => {
         countryCode : req.body.countryCode,
         type : req.body.type,
         date : moment().format('DD/MM/YYYY at HH:mm'),
+        email : req.body.email,
+        title : req.body.title,
         author : 1,
         status : 'new'
         });

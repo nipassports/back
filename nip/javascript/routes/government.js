@@ -3,7 +3,8 @@ const express = require('express');
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const router = express.Router();
-const mongoose = require("mongoose");
+const ObjectID = require('mongodb').ObjectID;
+
 
 
 //Include pour les connexions (blockchain et mangoDB)
@@ -83,9 +84,25 @@ router.get('/problems/all', checkAuth, (req, res, next) => {
 // récupérer les problemes
 router.get('/problems/:passNb', checkAuth, (req, res, next) => {
   const passNb = req.params.passNb;
-  console.log("Demande du pays: "+countryCode);
-  Problem.find({ countryCode: countryCode,passNb:passNb}).sort({ date : -1 }).limit(10)
+  Problem.find({ countryCode: res.locals.countryCode,passNb:passNb}).sort({ date : -1 }).limit(10)
     .then(problem => (problem) ? res.status(201).json(problem) : res.status(250).json({ message: "no problems declared " }))
+    .catch(err => console.log("err" + err))
+})
+
+router.post('/problems/:id', checkAuth, (req, res, next) => {
+  
+  Problem.findOne({ _id : ObjectID(req.params.id)})
+    .then(problem => {
+      console.log(problem.countryCode);
+      old=problem;
+      problem.status="treated";
+      console.log(problem.status);
+      console.log(old.status);
+      if (problem!==null){
+
+    res.status(201).json(problem)}
+     else{
+      res.status(250).json({ message: "no problems with this id is found " })}})
     .catch(err => console.log("err" + err))
 })
 

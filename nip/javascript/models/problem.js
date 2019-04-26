@@ -23,6 +23,14 @@ const problemSchema = mongoose.Schema({
         type : String,
         required : true
     },
+    email:{
+        type : String,
+        required : true
+    },
+    title:{
+        type : String,
+        required : true
+    },
     author:{
         type : Boolean,
         required : true

@@ -68,6 +68,8 @@ router.post('/problem',checkAuthCitizen ,(req, res, next) => {
         countryCode : JSON.parse(buffer.toString()).infos.countryCode,
         type : req.body.type,
         date : moment().format('DD/MM/YYYY at HH:mm'),
+        email : req.body.email,
+        title : req.body.title,
         author : 0,
         status : "new"
         });
