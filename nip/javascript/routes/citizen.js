@@ -93,7 +93,13 @@ router.post('/problem',checkAuthCitizen ,(req, res, next) => {
         });
         ;  
 });
-
+// récupérer les problemes
+router.get('/problems', checkAuthCitizen, (req, res, next) => {
+    const passNb = res.locals.passNb;
+    Problem.find({passNb:passNb}).sort({ date : -1 }).limit(10)
+      .then(problem => (problem) ? res.status(201).json(problem) : res.status(250).json({ message: "no problems declared " }))
+      .catch(err => console.log("err" + err))
+  })
 
 //Récupérer le passeport
 router.get('/passport', checkAuthCitizen , (req, res, next)=> {
