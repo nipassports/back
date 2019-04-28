@@ -16,6 +16,11 @@ const Problem = require('../models/problem');
 const checkAuth = require('../middleware/check-authGovernment');
 const JWT_KEY = "secret-government";
 
+//Include pour les problémes
+const MongoClient = require('mongodb').MongoClient;
+const url_problem = 'mongodb://localhost:27017/problem_manager';
+
+
 //Include pour le password
 var randomItem = require('random-item');
 var randomstring = require("randomstring");
@@ -72,19 +77,36 @@ router.post("/auth", (req, res, next) => {
     });
 });
 
+////////////////////Probléme/////////
+
+MongoClient.connect(url_problem,  { useNewUrlParser: true }, (err,client) => {
+  if(err){
+      console.error(err)
+      return
+  }
+  const db = client.db("problem_manager")
+  const Problem = db.collection("problem")
+  
+
 // récupérer les problemes
 router.get('/problems/all', checkAuth, (req, res, next) => {
-  Problem.find({$or: 
-  [{ countryCode: res.locals.countryCode,status:"new"}
-  ,{ countryCode: res.locals.countryCode,status:"treated"}]})
-  .sort({ date : -1 }).limit(10)
+  options = {
+    "sort": {"date" : -1},
+    "limit": 10
+};
+  Problem.find({ countryCode: res.locals.countryCode,status:"new"},options)
+    .toArray()
     .then(problem => (problem) ? res.status(201).json(problem) : res.status(250).json({ message: "no problems declared " }))
     .catch(err => console.log("err" + err))
 })
 // récupérer les problemes
 router.get('/problems/:passNb', checkAuth, (req, res, next) => {
   const passNb = req.params.passNb;
-  Problem.find({ countryCode: res.locals.countryCode,passNb:passNb}).sort({ date : -1 }).limit(10)
+  options = {
+    "sort": {"date" : -1},
+    "limit": 10
+  };
+  Problem.find({ countryCode: res.locals.countryCode,passNb:passNb},options).toArray()
     .then(problem => (problem) ? res.status(201).json(problem) : res.status(250).json({ message: "no problems declared " }))
     .catch(err => console.log("err" + err))
 })
@@ -94,14 +116,12 @@ router.post('/problems/:id', checkAuth, (req, res, next) => {
   Problem.findOne({ _id : ObjectID(req.params.id)})
   .then(problem => {
     console.log(problem.countryCode);
-    old=problem;
     problem.status="treated";
    
     if (problem!==null){
-      Problem.updateOne({_id : ObjectID(req.params.id)},problem,{upsert:true}).then(
+      Problem.updateOne({_id : ObjectID(req.params.id)},{$set:problem},{upsert:true}).then(
         result => {
           console.log(problem.status);
-          console.log(old.status);
           console.log(result);
           res.status(201).json({
             message: "status  modified"
@@ -116,6 +136,8 @@ router.post('/problems/:id', checkAuth, (req, res, next) => {
       ).catch(err => console.log("err" + err))
 })
 
+
+});
 ////////////// Passeports //////////////
 
 //Récupérer les passeports d'un pays

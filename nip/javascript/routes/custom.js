@@ -6,12 +6,19 @@ const moment = require("moment");
 const mongoose = require("mongoose");
 const router = express.Router();
 const checkAuth = require('../middleware/check-authCustom.js');
+const ObjectID = require('mongodb').ObjectID;
 
 const JWT_KEY = "secret-custom";
 
 const smartContract = require('../smartContract.js');
 const promisePassport = smartContract(2, 'passport');
 const promiseVisa = smartContract(2, 'visa');
+
+
+//Include pour les problémes
+const MongoClient = require('mongodb').MongoClient;
+const url_problem = 'mongodb://localhost:27017/problem_manager';
+
 
 var hash = require('object-hash');
 
@@ -64,10 +71,19 @@ router.post("/auth", (req, res, next) => {
 });
 
 
+////////////////////Probléme/////////
+
+MongoClient.connect(url_problem,  { useNewUrlParser: true }, (err,client) => {
+  if(err){
+      console.error(err)
+      return
+  }
+  const db = client.db("problem_manager")
+  const Problem = db.collection("problem")
+  
   //déclarer un probléme  
   router.post('/problem',  checkAuth,(req, res, next) => {
-    const problem=new Problem({
-        _id: new mongoose.Types.ObjectId(), 
+    const problem=({
         passNb : req.body.passNb,
         message : req.body.message,
         countryCode : req.body.countryCode,
@@ -78,8 +94,7 @@ router.post("/auth", (req, res, next) => {
         author : 1,
         status : 'new'
         });
-        problem
-        .save()
+        Problem.insert(problem)
         .then(result => {
             console.log(result);
             res.status(201).json({
@@ -98,11 +113,15 @@ router.post("/auth", (req, res, next) => {
 
 router.get('/problems/:passNb', checkAuth, (req, res, next) => {
   const passNb = req.params.passNb;
-  Problem.find({passNb:passNb}).sort({ date : -1 }).limit(10)
+  options = {
+    "sort": {"date" : -1},
+    "limit": 10
+};
+  Problem.find({passNb:passNb},options).toArray()
     .then(problem => (problem) ? res.status(201).json(problem) : res.status(250).json({ message: "no problems declared " }))
     .catch(err => console.log("err" + err))
 })
-
+});
 ////////////// Passeports //////////////
 
 //Récupérer tous les passeports

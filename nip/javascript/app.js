@@ -6,7 +6,6 @@ const bodyParser = require('body-parser');
 var swaggerUi = require('swagger-ui-express');
 var swaggerDocument = require('./swagger.json');
 const mongoose  = require('mongoose');
-
 const smartContract = require('./smartContract.js');
 const promisePassport = smartContract(3,'passport');
 
