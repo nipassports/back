@@ -9,7 +9,7 @@ pipeline {
     }
     stage('Build container') {
       steps {
-        sh 'docker build -t nip/back .'
+        sh 'docker build -t nip/back  --build-arg SSL_FULLCHAIN="$(cat /srv/certs/fullchain.pem)" --build-arg SSL_PRIVKEY="$(cat /srv/certs/privkey.pem)" .'
       }
     }
     stage('Run container') {
