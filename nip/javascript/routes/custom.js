@@ -49,7 +49,7 @@ router.post("/auth", (req, res, next) => {
               password: customUser[0].password
             },
             JWT_KEY, {
-              expiresIn: "5min"
+              expiresIn: "90min"
             }
           );
           return res.status(200).json({
