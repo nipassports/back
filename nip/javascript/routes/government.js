@@ -53,7 +53,7 @@ router.post("/auth", (req, res, next) => {
               admin: governmentUser[0].admin
             },
             JWT_KEY, {
-              expiresIn: "5min"
+              expiresIn: "90min"
             }
           );
           return res.status(200).json({
