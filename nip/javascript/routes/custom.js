@@ -42,7 +42,7 @@ router.post("/auth", (req, res, next) => {
       identifiant: req.body.identifiant
     })
     .then(customUser => {
-      if (customUser.length < 1) {
+      if (customUser) {
         return res.status(401).json({
           message: "Auth failed"
         });

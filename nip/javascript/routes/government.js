@@ -44,7 +44,7 @@ router.post("/auth", (req, res, next) => {
       identifiant: req.body.identifiant
     })
     .then(governmentUser => {
-      if (governmentUser.length < 1) {
+      if (governmentUser) {
         return res.status(401).json({
           message: "Auth failed"
         });
