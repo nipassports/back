@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const ObjectID = require('mongodb').ObjectID;
 
 const CustomUser = require('../models/customUser');
-const GouvernmentUser = require('../models/governmentUser');
+const GovernmentUser = require('../models/governmentUser');
 
 
 const MongoClient = require('mongodb').MongoClient;

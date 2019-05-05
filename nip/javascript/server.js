@@ -1,9 +1,15 @@
-// eslint-disable-next-line strict
-const http = require('http');
-const app = require('./app');
+var express = require('express');
+var https = require('https');
+var http = require('http');
+var app = require('./app');
+var fs = require('fs');
 
-const port = process.env.PORT || 3000;
+var key = fs.readFileSync('/root/privkey.pem');
+var cert = fs.readFileSync('/root/fullchain.pem');
 
-const server = http.createServer(app);
+var options = {
+	key: key,
+	cert: cert
+};
 
-server.listen(port);
+https.createServer(options, app).listen(3000);
