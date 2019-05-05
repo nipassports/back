@@ -15,9 +15,10 @@ const promisePassport = smartContract(2, 'passport');
 const promiseVisa = smartContract(2, 'visa');
 
 
-//Include pour les problémes
+
 const MongoClient = require('mongodb').MongoClient;
 const url_problem = 'mongodb://localhost:27017/problem_manager';
+const url_customUser = 'mongodb://localhost:27017/custom_user_manager';
 
 
 var hash = require('object-hash');
@@ -25,19 +26,28 @@ var hash = require('object-hash');
 const Problem = require('../models/problem')
 const CustomUser = require('../models/customUser');
 
+
+MongoClient.connect( url_customUser,  { useNewUrlParser: true }, (err,client) => {
+  if(err){
+      console.error(err)
+      return
+  }
+  const db = client.db("custom_user_manager")
+  const CustomUser = db.collection("custom")
+
+
 //Authentifiction
 router.post("/auth", (req, res, next) => {
-  CustomUser.find({
+  CustomUser.findOne({
       identifiant: req.body.identifiant
     })
-    .exec()
     .then(customUser => {
       if (customUser.length < 1) {
         return res.status(401).json({
           message: "Auth failed"
         });
       }
-      bcrypt.compare(req.body.password, customUser[0].password, (err, result) => {
+      bcrypt.compare(req.body.password, customUser.password, (err, result) => {
         if (err) {
           return res.status(401).json({
             message: "Auth failed"
@@ -45,8 +55,8 @@ router.post("/auth", (req, res, next) => {
         }
         if (result) {
           const token = jwt.sign({
-              identifiant: customUser[0].identifiant,
-              password: customUser[0].password
+              identifiant: customUser.identifiant,
+              password: customUser.password
             },
             JWT_KEY, {
               expiresIn: "5min"
@@ -69,7 +79,7 @@ router.post("/auth", (req, res, next) => {
       });
     });
 });
-
+})
 
 ////////////////////Probléme/////////
 

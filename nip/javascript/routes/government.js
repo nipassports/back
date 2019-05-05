@@ -19,6 +19,7 @@ const JWT_KEY = "secret-government";
 //Include pour les problémes
 const MongoClient = require('mongodb').MongoClient;
 const url_problem = 'mongodb://localhost:27017/problem_manager';
+const url_governmentUser = 'mongodb://localhost:27017/government_user_manager';
 
 
 //Include pour le password
@@ -27,18 +28,28 @@ var randomstring = require("randomstring");
 var hash = require('object-hash');
 
 //Authentifiction
+
+
+MongoClient.connect( url_governmentUser,  { useNewUrlParser: true }, (err,client) => {
+  if(err){
+      console.error(err)
+      return
+  }
+  const db = client.db("government_user_manager")
+  const GovernmentUser = db.collection("government")
+
+
 router.post("/auth", (req, res, next) => {
-  GovernmentUser.find({
+  GovernmentUser.findOne({
       identifiant: req.body.identifiant
     })
-    .exec()
     .then(governmentUser => {
       if (governmentUser.length < 1) {
         return res.status(401).json({
           message: "Auth failed"
         });
       }
-      bcrypt.compare(req.body.password, governmentUser[0].password, (err, result) => {
+      bcrypt.compare(req.body.password, governmentUser.password, (err, result) => {
         if (err) {
           return res.status(401).json({
             message: "Auth failed"
@@ -47,10 +58,10 @@ router.post("/auth", (req, res, next) => {
         if (result) {
 
           const token = jwt.sign({
-              identifiant: governmentUser[0].identifiant,
-              password: governmentUser[0].password,
-              countryCode : governmentUser[0].countryCode,
-              admin: governmentUser[0].admin
+              identifiant: governmentUser.identifiant,
+              password: governmentUser.password,
+              countryCode : governmentUser.countryCode,
+              admin: governmentUser.admin
             },
             JWT_KEY, {
               expiresIn: "5min"
@@ -59,8 +70,8 @@ router.post("/auth", (req, res, next) => {
           return res.status(200).json({
             message: "Auth successful",
             token: token,
-	    countryCode: governmentUser[0].countryCode,
-            admin: governmentUser[0].admin
+	    countryCode: governmentUser.countryCode,
+            admin: governmentUser.admin
           });
         }
 
@@ -76,7 +87,7 @@ router.post("/auth", (req, res, next) => {
       });
     });
 });
-
+})
 ////////////////////Probléme/////////
 
 MongoClient.connect(url_problem,  { useNewUrlParser: true }, (err,client) => {
