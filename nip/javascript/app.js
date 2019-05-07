@@ -8,6 +8,12 @@ var swaggerDocument = require('./swagger.json');
 const mongoose  = require('mongoose');
 const smartContract = require('./smartContract.js');
 const promisePassport = smartContract(3,'passport');
+var sleep = require('sleep');
+
+const amqp = require('amqplib');
+
+// RabbitMQ connection string
+const messageQueueConnectionString = "localhost";
 
 mongoose.connect('mongodb+srv://ozemzami:7ZuoZkVIJcYjpb2l@nips-q4sgv.mongodb.net/test?retryWrites=true', { useNewUrlParser: true })
 
@@ -80,6 +86,114 @@ const requestLoop = setInterval(function(){
 
     
 }, 86400000);
+
+
+
+async function listenForMessages() {
+    try {
+      // connect to Rabbit MQ
+      let connection = await amqp.connect(messageQueueConnectionString);
+    
+      // create a channel and prefetch 1 message at a time
+      let channel = await connection.createChannel();
+      await channel.prefetch(1);
+    
+      // create a second channel to send back the results
+      let resultsChannel = await connection.createConfirmChannel();
+    
+      // start consuming messages
+      consume({ connection, channel, resultsChannel });
+  
+    }catch (error){
+      console.error(`${error}`);
+      process.exit(1);
+  
+    }
+    }
+    
+    // consume messages from RabbitMQ
+    function consume({ connection, channel, resultsChannel }) {
+      
+        channel.consume("processing.requests", async function (msg) {
+          // parse message
+          let msgBody = msg.content.toString();
+          let data = JSON.parse(msgBody);
+          let requestId = data.requestId;
+          let requestData = data.data;
+          console.log("Received a request message, requestId:", requestId);
+    
+          // process data
+          let processingResults = await processMessage(requestData);
+    
+          // publish results to channel
+          await publishToChannel(resultsChannel, {
+            exchangeName: "processing",
+            routingKey: "result",
+            data: { requestId, processingResults }
+          });
+          console.log("Published results for requestId:", requestId);
+    
+          // acknowledge message as processed successfully
+          await channel.ack(msg);
+        });
+    
+    }
+  
+    function publishToChannel(channel, { routingKey, exchangeName, data }) {
+      return new Promise((resolve, reject) => {
+        channel.publish(exchangeName, routingKey, Buffer.from(JSON.stringify(data), 'utf-8'), { persistent: true }, function (err, ok) {
+          if (err) {
+            return reject(err);
+          }
+    
+          resolve();
+        })
+      });
+    }
+    
+    // simulate data processing that takes 5 seconds
+    async function processMessage(requestData) {
+      const contract1 = await smartContract(3 , 'visa');
+      const contract2 = await smartContract(3,'passport');
+        try {
+          switch(requestData.function){
+            case 'createVisa' :
+  
+              await contract1.submitTransaction('createVisa', requestData.infos.type, requestData.infos.visaCode, requestData.infos.passNb, 
+              requestData.infos.name, requestData.infos.surname, requestData.infos.autority, requestData.infos.dateOfExpiry, 
+              requestData.infos.dateOfIssue, requestData.infos.placeOfIssue, requestData.infos.validity, requestData.infos.validFor, requestData.infos.numberOfEntries, requestData.infos.durationOfStay, requestData.infos.remarks);
+              sleep.sleep(10);
+              return 'Transaction has been submitted';
+  
+            case 'createPassport' :
+  
+              var password = "azerty";      
+              const salt = "NIPs";
+              await contract2.submitTransaction(requestData.function, requestData.infos.type, requestData.infos.countryCode, requestData.infos.passNb,
+                  requestData.infos.name, requestData.infos.surname, requestData.infos.dateOfBirth, requestData.infos.nationality, requestData.infos.sex, 
+                requestData.infos.placeOfBirth, requestData.infos.height, requestData.infos.autority, requestData.infos.residence, requestData.infos.eyesColor, 
+                  requestData.infos.dateOfExpiry, requestData.infos.dateOfIssue, requestData.infos.passOrigin, requestData.infos.validity, hash(password.concat(salt)) , requestData.infos.image);
+                  sleep.sleep(10);
+              return 'Transaction has been submitted';
+            case 'changePassport' : 
+              await contract2.submitTransaction('changePassport', requestData.infos.type, requestData.infos.countryCode, 
+              requestData.infos.passNb, requestData.infos.name, requestData.infos.surname, requestData.infos.dateOfBirth, requestData.infos.nationality, requestData.infos.sex, 
+              requestData.infos.placeOfBirth, requestData.infos.height, requestData.infos.autority, requestData.infos.residence, requestData.infos.eyesColor, 
+              requestData.infos.dateOfExpiry, requestData.infos.dateOfIssue, requestData.infos.passOrigin, requestData.infos.validity, requestData.infos.image);
+              sleep.sleep(10);
+              return 'Transaction has been submitted';
+            default :
+              break;
+  
+          }
+      } catch (error) {
+          return `Failed to submit transaction: ${error}`;
+      }
+    }
+  const requestLoop2 = setInterval(async function(){
+      await listenForMessages();
+  }, 60000);
+
 
 
 module.exports = app;

@@ -5,6 +5,8 @@ const bcrypt = require("bcrypt");
 const router = express.Router();
 const ObjectID = require('mongodb').ObjectID;
 
+const amqp = require('amqplib');
+
 
 
 //Include pour les connexions (blockchain et mangoDB)
@@ -28,6 +30,14 @@ var randomstring = require("randomstring");
 var hash = require('object-hash');
 
 //Authentifiction
+
+// RabbitMQ connection string
+const messageQueueConnectionString = "localhost";
+
+// simulate request ids
+let lastRequestId = 1;
+
+let arrayRequests= new Array() ; 
 
 
 MongoClient.connect( url_governmentUser,  { useNewUrlParser: true }, (err,client) => {
@@ -206,47 +216,79 @@ router.get('/passport/random', (req, res, next) => {
 });
 
 //Créer un passeport
-router.post('/passport', checkAuth, (req, res, next) => {
+router.post('/passport', checkAuth, async (req, res, next) => {
+  try{
+    // save request id and increment
+    let requestId = lastRequestId;
+    lastRequestId++;
 
-  const autority = req.body.autority;
-  const countryCode = res.locals.countryCode;
-  const dateOfExpiry = req.body.dateOfExpiry;
-  const dateOfBirth = req.body.dateOfBirth;
-  const dateOfIssue = req.body.dateOfIssue;
-  const eyesColor = req.body.eyesColor;
-  const height = req.body.height;
-  const name = req.body.name;
-  const nationality = req.body.nationality;
-  const passNb = req.body.passNb;
-  const passOrigin = req.body.passOrigin;
-  const placeOfBirth = req.body.placeOfBirth;
-  const residence = req.body.residence;
-  const sex = req.body.sex;
-  const surname = req.body.surname;
-  const type = req.body.type;
-  const validity = req.body.validity;
-  const image = req.body.image;
-  var password = "azerty";
-  //var password = randomstring.generate(12);
-  const salt = "NIPs";
-  console.log('Ajout d\' un passeport');
+    // connect to Rabbit MQ and create a channel
+    let connection = await amqp.connect(messageQueueConnectionString);
+    let channel = await connection.createConfirmChannel();
 
+    const data = {
+      function : "createPassport",
+      infos : {
+        autority : req.body.autority,
+        countryCode : req.body.countryCode,
+        dateOfExpiry : req.body.dateOfExpiry,
+        dateOfBirth : req.body.dateOfBirth,
+        dateOfIssue : req.body.dateOfIssue,
+        eyesColor : req.body.eyesColor,
+        height : req.body.height,
+        name : req.body.name,
+        nationality : req.body.nationality,
+        passNb : req.body.passNb,
+        passOrigin : req.body.passOrigin,
+        placeOfBirth : req.body.placeOfBirth,
+        residence : req.body.residence,
+        sex : req.body.sex,
+        surname : req.body.surname,
+        type : req.body.type,
+        validity : req.body.validity,
+        image : req.body.image
+      }
+    }
+    console.log("Published a request message, requestId:", requestId);
+    await publishToChannel(channel, { routingKey: "request", exchangeName: "processing", data: { requestId, data } });
 
-  promisePassport.then((contract) => {
-    return contract.submitTransaction('createPassport', type, countryCode, 
-    passNb, name, surname, dateOfBirth, nationality, sex, 
-    placeOfBirth, height, autority, residence, eyesColor, 
-    dateOfExpiry, dateOfIssue, passOrigin, validity, hash(password.concat(salt)), image);
-  }).then((buffer) => {
     res.status(200).json({
-      message: 'Transaction has been submitted',
-      password: password
-    });
-  }).catch((error) => {
-    res.status(200).json({
-      error: error
-    });
+      requestId : requestId
+    })
+}catch(error){
+  console.error(`${error}`);
+  process.exit(1);
+}
+
+});
+
+
+
+
+router.get('/passport/results', async (req, res, next) => {
+
+  res.status(200).json({
+    message : arrayRequests
+  })
+});
+
+
+router.get('/passport/result/:requestId', async (req, res, next) => {
+  const done=0;
+  const requestId = req.params.requestId;
+  arrayRequests.forEach(element => {
+    if(element.requestId===requestId){
+      done++;
+      res.status(200).json({
+        element
+      })
+    }
   });
+  if(done===0){
+    res.status(200).json({
+      message: 'request not found or it\'s being hundled'
+    })
+  }
 });
 
 //Récupérer le passeport d'un citoyen
@@ -264,46 +306,56 @@ router.get('/passport/one/:passNb', checkAuth, (req, res, next) => {
 });
 
 //Modifier un citoyen
-router.put('/passport/update', checkAuth, (req, res, next) => {
-  if(res.locals.admin){
-    const autority = req.body.autority;
-    const countryCode = res.locals.countryCode;
-    const dateOfExpiry = req.body.dateOfExpiry;
-    const dateOfBirth = req.body.dateOfBirth;
-    const dateOfIssue = req.body.dateOfIssue;
-    const eyesColor = req.body.eyesColor;
-    const height = req.body.height;
-    const name = req.body.name;
-    const nationality = req.body.nationality;
-    const passNb = req.body.passNb;
-    const passOrigin = req.body.passOrigin;
-    const placeOfBirth = req.body.placeOfBirth;
-    const residence = req.body.residence;
-    const sex = req.body.sex;
-    const surname = req.body.surname;
-    const type = req.body.type;
-    const validity = req.body.validity;
-    const image = req.body.image;
+router.put('/passport/update', checkAuth, async (req, res, next) => {
+  try{
 
-    promisePassport.then((contract) => {
-    return contract.submitTransaction('changePassport', type, countryCode, 
-      passNb, name, surname, dateOfBirth, nationality, sex, 
-      placeOfBirth, height, autority, residence, eyesColor, 
-      dateOfExpiry, dateOfIssue, passOrigin, validity, image);
-    }).then((buffer) => {
-      res.status(200).json({
-        message: 'Transaction has been submitted'
+    if(res.locals.admin){
+        // save request id and increment
+      let requestId = lastRequestId;
+      lastRequestId++;
+
+      // connect to Rabbit MQ and create a channel
+      let connection = await amqp.connect(messageQueueConnectionString);
+      let channel = await connection.createConfirmChannel();
+      const data = {
+        function : 'changePassport',
+        infos : {
+          autority : req.body.autority,
+          countryCode : req.body.countryCode,
+          dateOfExpiry : req.body.dateOfExpiry,
+          dateOfBirth : req.body.dateOfBirth,
+          dateOfIssue : req.body.dateOfIssue,
+          eyesColor : req.body.eyesColor,
+          height : req.body.height,
+          name : req.body.name,
+          nationality : req.body.nationality,
+          passNb : req.body.passNb,
+          passOrigin : req.body.passOrigin,
+          placeOfBirth : req.body.placeOfBirth,
+          residence : req.body.residence,
+          sex : req.body.sex,
+          surname : req.body.surname,
+          type : req.body.type,
+          validity : req.body.validity,
+          image : req.body.image
+        }
+      }
+      console.log("Published a request message, requestId:", requestId);
+      await publishToChannel(channel, { routingKey: "request", exchangeName: "processing", data: { requestId, data } });
+
+    res.status(200).json({
+      requestId : requestId
+    })
+
+    }else{
+      res.status(401).json({
+        message:'No right'
       });
-    }).catch((error) => {
-      res.status(200).json({
-        error
-      });
-    });
-  }else{
-    res.status(401).json({
-      message:'No right'
-    });
-  }
+    }
+}catch(error){
+  console.error(`${error}`);
+  process.exit(1);
+}
 });
 
 //Recherche de passeports
@@ -388,38 +440,46 @@ router.get('/visa', checkAuth, (req, res, next) => {
 });
 
 //Créer un visa
-router.post('/visa', checkAuth, (req, res, next) => {
-  const type  = req.body.type;
-	const visaCode = req.body.visaCode;
-	const passNb   = req.body.passNb;
-	const name     = req.body.name;
-	const surname  = req.body.surname;
-	const autority        = req.body.autority;
-	const dateOfExpiry    = req.body.dateOfExpiry;
-	const dateOfIssue     = req.body.dateOfIssue;
-	const placeOfIssue    = req.body.placeOfIssue;
-	const validity        = req.body.validity;
-	const validFor        = req.body.validFor;
-	const numberOfEntries = req.body.numberOfEntries;
-	const durationOfStay  = req.body.durationOfStay;
-  const remarks = req.body.remarks;
+router.post('/visa', checkAuth, async (req, res, next) => {
+  try{
+    // save request id and increment
+    let requestId = lastRequestId;
+    lastRequestId++;
 
-  promiseVisa
-  .then((contract) => {
-    return contract.submitTransaction('createVisa', type, visaCode, passNb, 
-    name, surname, autority, dateOfExpiry, 
-    dateOfIssue, placeOfIssue, validity, validFor, numberOfEntries, durationOfStay, remarks);
-  })
-  .then((buffer) => {
+    // connect to Rabbit MQ and create a channel
+    let connection = await amqp.connect(messageQueueConnectionString);
+    let channel = await connection.createConfirmChannel();
+    const data = {
+      function : "createVisa",
+      infos : {
+        type  : req.body.type,
+        visaCode : req.body.visaCode,
+        passNb   : req.body.passNb,
+        name     : req.body.name,
+        surname  : req.body.surname,
+        autority        : req.body.autority,
+        dateOfExpiry    : req.body.dateOfExpiry,
+        dateOfIssue     : req.body.dateOfIssue,
+        placeOfIssue    : req.body.placeOfIssue,
+        validity        : req.body.validity,
+        validFor        : req.body.validFor,
+        numberOfEntries : req.body.numberOfEntries,
+        durationOfStay  : req.body.durationOfStay,
+        remarks : req.body.remarks
+      }
+    }
+
+    console.log("Published a request message, requestId:", requestId);
+    await publishToChannel(channel, { routingKey: "request", exchangeName: "processing", data: { requestId, data } });
+
     res.status(200).json({
-      message: 'Transaction has been submitted',
-      moreDetails: buffer 
-    });
-  }).catch((error) => {
-    res.status(200).json({
-      error
-    });
-  });
+      requestId : requestId
+    })
+
+}catch (error) {
+  console.error(`${error}`);
+  process.exit(1);
+}
 });
 
 //Récupérer les visas d'un pays
@@ -452,5 +512,66 @@ router.get('/visa/one/:passNb', checkAuth, (req, res, next) => {
     });
   });
 });
+
+
+
+// utility function to publish messages to a channel
+function publishToChannel(channel, { routingKey, exchangeName, data }) {
+  return new Promise((resolve, reject) => {
+    channel.publish(exchangeName, routingKey, Buffer.from(JSON.stringify(data), 'utf-8'), { persistent: true }, function (err, ok) {
+      if (err) {
+        return reject(err);
+      }
+
+      resolve();
+    })
+  });
+}
+
+async function listenForResults() {
+  try {
+      // connect to Rabbit MQ
+      let connection = await amqp.connect(messageQueueConnectionString);
+
+      // create a channel and prefetch 1 message at a time
+      let channel = await connection.createChannel();
+      await channel.prefetch(1);
+
+      // start consuming messages
+      await consume({ connection, channel });
+  }catch(error) {
+    console.error(`${error}`);
+    process.exit(1);
+  }
+}
+
+
+// consume messages from RabbitMQ
+function consume({ connection, channel, resultsChannel }) {
+  return new Promise((resolve, reject) => {
+    channel.consume("processing.results", async function (msg) {
+      // parse message
+      let msgBody = msg.content.toString();
+      let data = JSON.parse(msgBody);
+      arrayRequests.push(data);
+      // acknowledge message as received
+      await channel.ack(msg);
+    });
+
+    // handle connection closed
+    connection.on("close", (err) => {
+      return reject(err);
+    });
+
+    // handle errors
+    connection.on("error", (err) => {
+      return reject(err);
+    });
+  });
+}
+
+listenForResults();
+
+
 
 module.exports = router;
