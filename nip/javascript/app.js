@@ -9,6 +9,7 @@ const mongoose  = require('mongoose');
 const smartContract = require('./smartContract.js');
 const promisePassport = smartContract(3,'passport');
 var sleep = require('sleep');
+var hash = require('object-hash');
 
 const amqp = require('amqplib');
 
