@@ -32,7 +32,7 @@ var hash = require('object-hash');
 //Authentifiction
 
 // RabbitMQ connection string
-const messageQueueConnectionString = "localhost";
+const messageQueueConnectionString = "amqp://localhost";
 
 // simulate request ids
 let lastRequestId = 1;

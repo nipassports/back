@@ -3,7 +3,7 @@ require('dotenv').config();
 const amqp = require('amqplib');
 
 // RabbitMQ connection string
-const messageQueueConnectionString = "localhost";
+const messageQueueConnectionString = "amqp://localhost";
 
 async function setup() {
   try {

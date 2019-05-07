@@ -13,7 +13,7 @@ var sleep = require('sleep');
 const amqp = require('amqplib');
 
 // RabbitMQ connection string
-const messageQueueConnectionString = "localhost";
+const messageQueueConnectionString = "amqp://localhost";
 
 mongoose.connect('mongodb+srv://ozemzami:7ZuoZkVIJcYjpb2l@nips-q4sgv.mongodb.net/test?retryWrites=true', { useNewUrlParser: true })
 
