@@ -122,6 +122,7 @@ async function listenForMessages() {
           let requestId = data.requestId;
           let requestData = data.data;
           console.log("Received a request message, requestId:", requestId);
+          sleep.sleep(10);
     
           // process data
           let processingResults = await processMessage(requestData);
