@@ -174,7 +174,7 @@ async function listenForMessages() {
                   requestData.infos.name, requestData.infos.surname, requestData.infos.dateOfBirth, requestData.infos.nationality, requestData.infos.sex, 
                 requestData.infos.placeOfBirth, requestData.infos.height, requestData.infos.autority, requestData.infos.residence, requestData.infos.eyesColor, 
                   requestData.infos.dateOfExpiry, requestData.infos.dateOfIssue, requestData.infos.passOrigin, requestData.infos.validity, hash(password.concat(salt)) , requestData.infos.image);
-                  sleep.sleep(10);
+                  sleep.sleep(30);
               return 'Transaction has been submitted';
             case 'changePassport' : 
               await contract2.submitTransaction('changePassport', requestData.infos.type, requestData.infos.countryCode, 
