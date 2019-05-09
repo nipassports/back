@@ -120,8 +120,16 @@ MongoClient.connect(url_problem,  { useNewUrlParser: true }, (err,client) => {
         });  
   });
   
-//recevoir un probleme
+  
+//supprimer un probleme
+  router.get('/problems/deleteAll', checkAuth, (req, res, next) => {
+    Problem.remove({})
+    .then(result =>  res.status(201).json(result) )
+    .catch(err => console.log("err" + err))
+  })
+});
 
+//recevoir un probleme
 router.get('/problems/:passNb', checkAuth, (req, res, next) => {
   const passNb = req.params.passNb;
   options = {
