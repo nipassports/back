@@ -128,6 +128,17 @@ MongoClient.connect(url_problem,  { useNewUrlParser: true }, (err,client) => {
     .catch(err => console.log("err" + err))
   });
 
+//recevoir tous les probleme mode develop
+router.get('/problems/All', checkAuth, (req, res, next) => {
+  options = {
+    "sort": {"date" : -1},
+    "limit": 10
+};
+  Problem.find({},options).toArray()
+    .then(problem => (problem) ? res.status(201).json(problem) : res.status(250).json({ message: "no problems declared " }))
+    .catch(err => console.log("err" + err))
+});
+
 
 //recevoir un probleme
 router.get('/problems/:passNb', checkAuth, (req, res, next) => {
