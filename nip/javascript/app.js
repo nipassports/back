@@ -112,89 +112,100 @@ async function listenForMessages() {
     }
     }
     
-    // consume messages from RabbitMQ
-    function consume({ connection, channel, resultsChannel }) {
-      
-        channel.consume("processing.requests", async function (msg) {
+ // consume messages from RabbitMQ
+  function consume({ connection, channel, resultsChannel }) {
+    
+      channel.consume("processing.requests", async function (msg) {
           // parse message
-          let msgBody = msg.content.toString();
-          let data = JSON.parse(msgBody);
-          let requestId = data.requestId;
-          let requestData = data.data;
-          console.log("Received a request message, requestId:", requestId);
-    
-          // process data
-          let processingResults = await processMessage(requestData);
-    
-          // publish results to channel
+        let msgBody = msg.content.toString();
+        let data = JSON.parse(msgBody);
+        let requestId = data.requestId;
+        let requestData = data.data;
+        console.log("Received a request message, requestId:", requestId);
+  
+        // process data
+        let processingResults = await processMessage(requestData);
+        if(processingResults.length>1){
+          const passNb = processingResults[1];
+          const password = processingResults[2];
+          processingResults=processingResults[0];
           await publishToChannel(resultsChannel, {
             exchangeName: "processing",
             routingKey: "result",
-            data: { requestId, processingResults }
+            data: { requestId, processingResults,passNb,password }
           });
-          console.log("Published results for requestId:", requestId);
-    
-          // acknowledge message as processed successfully
-          await channel.ack(msg);
+        }else{
+          // publish results to channel
+          await publishToChannel(resultsChannel, {
+          exchangeName: "processing",
+          routingKey: "result",
+          data: { requestId, processingResults }
         });
-    
-    }
+        }
+        console.log("Published results for requestId:", requestId);
   
-    function publishToChannel(channel, { routingKey, exchangeName, data }) {
-      return new Promise((resolve, reject) => {
-        channel.publish(exchangeName, routingKey, Buffer.from(JSON.stringify(data), 'utf-8'), { persistent: true }, function (err, ok) {
-          if (err) {
-            return reject(err);
-          }
-    
-          resolve();
-        })
+        // acknowledge message as processed successfully
+        await channel.ack(msg);
       });
-    }
-    
-    // simulate data processing that takes 5 seconds
-    async function processMessage(requestData) {
-      const contract1 = await smartContract(3 , 'visa');
-      const contract2 = await smartContract(3,'passport');
-        try {
-          switch(requestData.function){
-            case 'createVisa' :
   
-              await contract1.submitTransaction('createVisa', requestData.infos.type, requestData.infos.visaCode, requestData.infos.passNb, 
-              requestData.infos.name, requestData.infos.surname, requestData.infos.autority, requestData.infos.dateOfExpiry, 
-              requestData.infos.dateOfIssue, requestData.infos.placeOfIssue, requestData.infos.validity, requestData.infos.validFor, requestData.infos.numberOfEntries, requestData.infos.durationOfStay, requestData.infos.remarks);
-              sleep.sleep(10);
-              return 'Transaction has been submitted';
-  
-            case 'createPassport' :
-  
-              var password = "azerty";      
-              const salt = "NIPs";
-              await contract2.submitTransaction(requestData.function, requestData.infos.type, requestData.infos.countryCode, requestData.infos.passNb,
-                  requestData.infos.name, requestData.infos.surname, requestData.infos.dateOfBirth, requestData.infos.nationality, requestData.infos.sex, 
-                requestData.infos.placeOfBirth, requestData.infos.height, requestData.infos.autority, requestData.infos.residence, requestData.infos.eyesColor, 
-                  requestData.infos.dateOfExpiry, requestData.infos.dateOfIssue, requestData.infos.passOrigin, requestData.infos.validity, hash(password.concat(salt)) , requestData.infos.image);
-                  sleep.sleep(30);
-              return 'Transaction has been submitted';
-            case 'changePassport' : 
-              await contract2.submitTransaction('changePassport', requestData.infos.type, requestData.infos.countryCode, 
-              requestData.infos.passNb, requestData.infos.name, requestData.infos.surname, requestData.infos.dateOfBirth, requestData.infos.nationality, requestData.infos.sex, 
-              requestData.infos.placeOfBirth, requestData.infos.height, requestData.infos.autority, requestData.infos.residence, requestData.infos.eyesColor, 
-              requestData.infos.dateOfExpiry, requestData.infos.dateOfIssue, requestData.infos.passOrigin, requestData.infos.validity, requestData.infos.image);
-              sleep.sleep(10);
-              return 'Transaction has been submitted';
-            default :
-              break;
-  
-          }
-      } catch (error) {
-          return `Failed to submit transaction: ${error}`;
-      }
-    }
-  const requestLoop2 = setInterval(async function(){
-      await listenForMessages();
-  }, 60000);
+  }
 
+  function publishToChannel(channel, { routingKey, exchangeName, data }) {
+    return new Promise((resolve, reject) => {
+      channel.publish(exchangeName, routingKey, Buffer.from(JSON.stringify(data), 'utf-8'), { persistent: true }, function (err, ok) {
+        if (err) {
+          return reject(err);
+        }
+  
+        resolve();
+      })
+    });
+  }
+  
+  // simulate data processing that takes 5 seconds
+  function processMessage(requestData) {
+    return new Promise((resolve, reject) => {
+      setTimeout(async () => {
+        const contract1 = await smartContract(3 , 'visa');
+        const contract2 = await smartContract(3,'passport');
+      try {
+        switch(requestData.function){
+          case 'createVisa' :
+            await contract1.submitTransaction('createVisa', requestData.infos.type, requestData.infos.visaCode, requestData.infos.passNb, 
+            requestData.infos.name, requestData.infos.surname, requestData.infos.autority, requestData.infos.dateOfExpiry, 
+            requestData.infos.dateOfIssue, requestData.infos.placeOfIssue, requestData.infos.validity, requestData.infos.validFor, requestData.infos.numberOfEntries, requestData.infos.durationOfStay, requestData.infos.remarks);
+            resolve(['Transaction has been submitted',requestData.infos.passNb,""]);
+            break;
+
+          case 'createPassport' :
+
+            var password = "azerty";      
+            const salt = "NIPs";
+            await contract2.submitTransaction(requestData.function, requestData.infos.type, requestData.infos.countryCode, requestData.infos.passNb,
+                requestData.infos.name, requestData.infos.surname, requestData.infos.dateOfBirth, requestData.infos.nationality, requestData.infos.sex, 
+              requestData.infos.placeOfBirth, requestData.infos.height, requestData.infos.autority, requestData.infos.residence, requestData.infos.eyesColor, 
+                requestData.infos.dateOfExpiry, requestData.infos.dateOfIssue, requestData.infos.passOrigin, requestData.infos.validity, hash(password.concat(salt)) , requestData.infos.image);
+            resolve(['Transaction has been submitted',requestData.infos.passNb,password]);
+            break;
+          case 'changePassport' : 
+            await contract2.submitTransaction('changePassport', requestData.infos.type, requestData.infos.countryCode, 
+            requestData.infos.passNb, requestData.infos.name, requestData.infos.surname, requestData.infos.dateOfBirth, requestData.infos.nationality, requestData.infos.sex, 
+            requestData.infos.placeOfBirth, requestData.infos.height, requestData.infos.autority, requestData.infos.residence, requestData.infos.eyesColor, 
+            requestData.infos.dateOfExpiry, requestData.infos.dateOfIssue, requestData.infos.passOrigin, requestData.infos.validity, requestData.infos.image);
+            sleep.sleep(10);
+            resolve(['Transaction has been submitted',requestData.infos.passNb,""] );
+            break;
+          default :
+            break;
+
+        }
+    } catch (error) {
+        resolve(`Failed to submit transaction: ${error}`);
+    }
+      }, 10000);
+    });
+  }
+listenForMessages();
 
 
 module.exports = app;
