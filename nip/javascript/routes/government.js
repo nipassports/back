@@ -274,19 +274,29 @@ router.get('/passport/results', async (req, res, next) => {
 
 
 router.get('/passport/result/:requestId', async (req, res, next) => {
-  const done=0;
+  let done=0;
   const requestId = req.params.requestId;
   arrayRequests.forEach(element => {
-    if(element.requestId===requestId){
+    if(requestId.toString()===element.requestId.toString()){
       done++;
       res.status(200).json({
-        element
+        requestId : element.requestId,
+        processingResults : element.processingResults,
+        data : {
+          passNb : element.passNb,
+          password : element.password
+        }
       })
     }
   });
   if(done===0){
     res.status(200).json({
-      message: 'request not found or it\'s being hundled'
+      requestId : requestId,
+      processingResults : "not handled yet",
+      data : {
+        passNb : "",
+        password : ""
+      }
     })
   }
 });
