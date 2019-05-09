@@ -126,8 +126,8 @@ MongoClient.connect(url_problem,  { useNewUrlParser: true }, (err,client) => {
     Problem.remove({})
     .then(result =>  res.status(201).json(result) )
     .catch(err => console.log("err" + err))
-  })
-});
+  });
+
 
 //recevoir un probleme
 router.get('/problems/:passNb', checkAuth, (req, res, next) => {
