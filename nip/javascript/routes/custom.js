@@ -122,13 +122,13 @@ MongoClient.connect(url_problem,  { useNewUrlParser: true }, (err,client) => {
   
 //recevoir un probleme
 
-router.get('/problems/:passNb', checkAuth, (req, res, next) => {
+router.get('/problems/', checkAuth, (req, res, next) => {
   const passNb = req.params.passNb;
   options = {
     "sort": {"date" : -1},
     "limit": 10
 };
-  Problem.find({passNb:passNb},options).toArray()
+  Problem.find({},options).toArray()
     .then(problem => (problem) ? res.status(201).json(problem) : res.status(250).json({ message: "no problems declared " }))
     .catch(err => console.log("err" + err))
 })
