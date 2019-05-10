@@ -95,13 +95,12 @@ MongoClient.connect(url_problem,  { useNewUrlParser: true }, (err,client) => {
   //déclarer un probléme  
   router.post('/problem',  checkAuth,(req, res, next) => {
     const passNb = req.params.passNb;
-    const countryCode ;
     promisePassport.then((contract) => {
       return contract.evaluateTransaction('queryPassportsByPassNb', passNb);
 
 
     }).then((buffer) => {
-     countryCode=JSON.parse(buffer.toString()).countryCode;
+    const countryCode=JSON.parse(buffer.toString()).countryCode;
      const problem=({
       passNb : req.body.passNb,
       message : req.body.message,
