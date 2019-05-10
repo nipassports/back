@@ -94,13 +94,14 @@ MongoClient.connect(url_problem,  { useNewUrlParser: true }, (err,client) => {
   
   //déclarer un probléme  
   router.post('/problem',  checkAuth,(req, res, next) => {
-    const passNb = req.params.passNb;
+    const passNb = req.body.passNb;
     promisePassport.then((contract) => {
       return contract.evaluateTransaction('queryPassportsByPassNb', passNb);
-
-
+      
     }).then((buffer) => {
-    const countryCode=JSON.parse(buffer.toString()).countryCode.toString();
+      const countryCode=JSON.parse(buffer.toString()).countryCode;
+      console.log(buffer.toString());
+      console.log(passNb);
      const problem=({
       passNb : req.body.passNb,
       message : req.body.message,
@@ -167,6 +168,9 @@ router.get('/problems/:passNb', checkAuth, (req, res, next) => {
     .catch(err => console.log("err" + err))
 })
 });
+
+
+
 ////////////// Passeports //////////////
 
 //Récupérer tous les passeports
