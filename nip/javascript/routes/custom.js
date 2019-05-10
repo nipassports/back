@@ -94,35 +94,51 @@ MongoClient.connect(url_problem,  { useNewUrlParser: true }, (err,client) => {
   
   //déclarer un probléme  
   router.post('/problem',  checkAuth,(req, res, next) => {
-    const problem=({
-        passNb : req.body.passNb,
-        message : req.body.message,
-        countryCode : req.body.countryCode,
-        type : req.body.type,
-        date : moment().format('DD/MM/YYYY at HH:mm'),
-        email : req.body.email,
-        title : req.body.title,
-        author : 1,
-        status : 'new'
-        });
-        Problem.insert(problem)
-        .then(result => {
-            console.log(result);
-            res.status(201).json({
-              message: "Problem sent"
-            });
-          })
+    const passNb = req.params.passNb;
+    const countryCode ;
+    promisePassport.then((contract) => {
+      return contract.evaluateTransaction('queryPassportsByPassNb', passNb);
+
+
+    }).then((buffer) => {
+     countryCode=JSON.parse(buffer.toString()).countryCode;
+     const problem=({
+      passNb : req.body.passNb,
+      message : req.body.message,
+      countryCode : countryCode,
+      type : req.body.type,
+      date : moment().format('DD/MM/YYYY at HH:mm'),
+      email : req.body.email,
+      title : req.body.title,
+      author : 1,
+      status : 'new'
+      });
+      Problem.insert(problem)
+      .then(result => {
+          console.log(result);
+          res.status(201).json({
+            message: "Problem sent"
+          });
+        })
         .catch(err => {
           console.log(err);
           res.status(500).json({
             error: err
           });
-        });  
+
+
+    })
+        }).catch((error) => {
+          res.status(200).json({
+            error
+          });
+        });
+        ;  
   });
   
   
 //supprimer un probleme
-  router.get('/problems/deleteAll', checkAuth, (req, res, next) => {
+  router.delete('/problems/deleteAll', checkAuth, (req, res, next) => {
     Problem.remove({})
     .then(result =>  res.status(201).json(result) )
     .catch(err => console.log("err" + err))
