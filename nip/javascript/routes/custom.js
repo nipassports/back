@@ -100,7 +100,7 @@ MongoClient.connect(url_problem,  { useNewUrlParser: true }, (err,client) => {
 
 
     }).then((buffer) => {
-    const countryCode=JSON.parse(buffer.toString()).countryCode;
+    const countryCode=JSON.parse(buffer.toString()).countryCode.toString();
      const problem=({
       passNb : req.body.passNb,
       message : req.body.message,
