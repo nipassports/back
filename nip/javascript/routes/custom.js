@@ -99,20 +99,20 @@ MongoClient.connect(url_problem,  { useNewUrlParser: true }, (err,client) => {
       return contract.evaluateTransaction('queryPassportsByPassNb', passNb);
       
     }).then((buffer) => {
-      const countryCode=JSON.parse(buffer.toString()).countryCode;
-      console.log(buffer.toString());
-      console.log(passNb);
-     const problem=({
-      passNb : req.body.passNb,
-      message : req.body.message,
-      countryCode : countryCode,
-      type : req.body.type,
-      date : moment().format('DD/MM/YYYY at HH:mm'),
-      email : req.body.email,
-      title : req.body.title,
-      author : 1,
-      status : 'new'
+      const countryCode=JSON.parse(buffer.toString()).infos.countryCode;
+      // console.log(buffer.toString());
+      const problem=({
+        passNb : req.body.passNb,
+        message : req.body.message,
+        countryCode : countryCode,
+        type : req.body.type,
+        date : moment().format('DD/MM/YYYY at HH:mm'),
+        email : req.body.email,
+        title : req.body.title,
+        author : 1,
+        status : 'new'
       });
+      console.log(countryCode);
       Problem.insert(problem)
       .then(result => {
           console.log(result);
@@ -148,7 +148,7 @@ MongoClient.connect(url_problem,  { useNewUrlParser: true }, (err,client) => {
 router.get('/problems/All', checkAuth, (req, res, next) => {
   options = {
     "sort": {"date" : -1},
-    "limit": 10
+    "limit": 30
 };
   Problem.find({},options).toArray()
     .then(problem => (problem) ? res.status(201).json(problem) : res.status(250).json({ message: "no problems declared " }))
