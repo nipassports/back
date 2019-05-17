@@ -202,7 +202,7 @@ async function listenForMessages() {
     } catch (error) {
         resolve(`Failed to submit transaction: ${error}`);
     }
-      }, 10000);
+      }, 2000);
     });
   }
 listenForMessages();
