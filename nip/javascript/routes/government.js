@@ -202,9 +202,7 @@ router.get('/passport/random', (req, res, next) => {
     height: String(randomItem(["1.45", "1.57", "1.98", "1.77", "1.62", "1.85", "1.59"])),
     name: String(randomItem(["Carla", "John", "Mathieu", "Julie", "Anne", "Jean-Baptiste", "Alexandre"])),
     nationality: String(randomItem(["French", "German", "British", "American", "Japanese", "Brazilian"])),
-    passNb: randomstring.generate({
-  length: 5,
-  capitalization: 'lowercase'
+    passNb: randomstring.generate({length: 5, charset: 'alphabetic', capitalization: 'lowercase'
 }),
     passOrigin: String(randomItem(["France", "Germany", "United Kingdom", "United States", "Japan", "Brazil"])),
     placeOfBirth: String(randomItem(["France", "Germany", "United Kingdom", "United States", "Japan", "Brazil"])),
