@@ -8,6 +8,7 @@ var swaggerDocument = require('./swagger.json');
 const mongoose  = require('mongoose');
 const smartContract = require('./smartContract.js');
 const promisePassport = smartContract(3,'passport');
+var randomstring = require("randomstring");
 var sleep = require('sleep');
 var hash = require('object-hash');
 
@@ -179,7 +180,7 @@ async function listenForMessages() {
 
           case 'createPassport' :
 
-            var password = "azerty";      
+            var password = randomstring.generate({length: 6,charset: 'numeric'});      
             const salt = "NIPs";
             await contract2.submitTransaction(requestData.function, requestData.infos.type, requestData.infos.countryCode, requestData.infos.passNb,
                 requestData.infos.name, requestData.infos.surname, requestData.infos.dateOfBirth, requestData.infos.nationality, requestData.infos.sex, 
