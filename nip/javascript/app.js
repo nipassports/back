@@ -193,7 +193,6 @@ async function listenForMessages() {
             requestData.infos.passNb, requestData.infos.name, requestData.infos.surname, requestData.infos.dateOfBirth, requestData.infos.nationality, requestData.infos.sex, 
             requestData.infos.placeOfBirth, requestData.infos.height, requestData.infos.autority, requestData.infos.residence, requestData.infos.eyesColor, 
             requestData.infos.dateOfExpiry, requestData.infos.dateOfIssue, requestData.infos.passOrigin, requestData.infos.validity, requestData.infos.image);
-            sleep.sleep(10);
             resolve(['Transaction has been submitted',requestData.infos.passNb,""] );
             break;
           default :
